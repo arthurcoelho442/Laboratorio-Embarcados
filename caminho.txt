@@ -1,3 +1,0 @@
-mount c c:\Users\CONECTADOS\Documents\GitHub\Laboratorio-Embarcados
-
-c:
