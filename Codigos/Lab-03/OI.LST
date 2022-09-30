@@ -1,0 +1,23 @@
+     1                                  ..start:
+     2                                  ; iniciar os registros de segmento DS e SS e o ponteiro de pilha SP
+     3 00000000 B8[0000]                	mov ax,data
+     4 00000003 8ED8                    	mov ds,ax
+     5 00000005 B8[0000]                	mov ax,stack
+     6 00000008 8ED0                    	mov ss,ax
+     7 0000000A BC[0001]                	mov sp,stacktop
+     8 0000000D B409                    	mov ah,9
+     9 0000000F BA[1800]                	mov dx,mensagem
+    10 00000012 CD21                    	int 21h
+    11                                  
+    12                                  ; Terminar o programa e voltar para o sistema operacional
+    13 00000014 B44C                    	mov ah,4ch
+    14 00000016 CD21                    	int 21h
+    15                                  segment data
+    16                                  	CR equ 0dh
+    17                                  	LF equ 0ah
+    18 00000018 4F692C206F6C686120-     	mensagem db 'Oi, olha eu aqui',CR,LF,'$'
+    19 00000021 657520617175690D0A-
+    20 0000002A 24                 
+    21                                  segment stack stack
+    22 00000000 <res 00000100>          	resb 256
+    23                                  stacktop:
