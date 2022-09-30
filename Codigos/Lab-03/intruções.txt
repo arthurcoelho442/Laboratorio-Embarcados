@@ -1,0 +1,4 @@
+nasm oi
+freelink oi
+oi.exe
+debug oi.exe
