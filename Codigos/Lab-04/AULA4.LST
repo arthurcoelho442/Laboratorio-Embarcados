@@ -1,0 +1,169 @@
+     1                                  segment code
+     2                                  ..start:
+     3 00000000 B8[0000]                	MOV 	AX, dados
+     4 00000003 8ED8                    	MOV 	DS, AX
+     5 00000005 B8[0000]                	MOV 	AX, stack
+     6 00000008 8ED0                    	MOV 	SS,AX
+     7 0000000A BC[0001]                	MOV 	SP,stacktop 
+     8                                  		
+     9                                   ; AQUI COMECA A EXECUCAO DO PROGRAMA PRINCIPAL
+    10 0000000D BA[0000]                	MOV 	DX,mensini ; mensagem de inicio
+    11 00000010 B409                    	MOV 	AH,9
+    12 00000012 CD21                    	INT 	21h
+    13                                  				
+    14 00000014 B80000                  	MOV 	AX,0 ; primeiro elemento da série
+    15 00000017 BB0100                  	MOV 	BX,1 ; segundo elemento da série
+    16                                  	L10:
+    17 0000001A 89C2                    		MOV 	DX,AX
+    18                                  		
+    19 0000001C E81700                  		CALL	imprimenumero
+    20                                  		
+    21                                  		
+    22 0000001F 01DA                    		ADD 	DX,BX ; calcula novo elemento da série
+    23 00000021 89D8                    		MOV 	AX,BX
+    24 00000023 89D3                    		MOV 	BX,DX
+    25                                  		
+    26 00000025 81FA5A00                		CMP 	DX, 0x5a
+    27 00000029 7CEF                    		JL 		L10
+    28                                  
+    29                                  ; AQUI TERMINA A EXECUCAO DO PROGRAMA PRINCIPAL
+    30                                  exit:
+    31 0000002B BA[2E00]                		MOV 	DX,mensfim ; mensagem de inicio
+    32 0000002E B409                    		MOV 	AH,9
+    33 00000030 CD21                    		INT	 	21h
+    34                                  quit:
+    35 00000032 B44C                    		MOV 	AH,4CH ; retorna para o DOS com código 0
+    36 00000034 CD21                    		INT 	21h
+    37                                  
+    38                                  ;*****************************************************************
+    39                                  
+    40                                  imprimenumero:
+    41                                  ; Save the context
+    42 00000036 9C                      	PUSHF
+    43 00000037 50                      	PUSH 	AX
+    44 00000038 53                      	PUSH 	BX
+    45 00000039 51                      	PUSH	CX
+    46 0000003A 52                      	PUSH 	DX
+    47                                  				
+    48 0000003B BF[3F00]                	MOV 	DI,saida
+    49 0000003E E80D00                  	CALL 	bin2ascii		
+    50                                  
+    51 00000041 BA[3F00]                	MOV 	DX,saida
+    52 00000044 B409                    	MOV 	AH,9h
+    53 00000046 CD21                    	INT 	21h         
+    54                                  		
+    55                                  ; Upgrade the context
+    56 00000048 5A                      	POP 	DX
+    57 00000049 59                      	POP 	CX
+    58 0000004A 5B                      	POP		BX
+    59 0000004B 58                      	POP 	AX
+    60 0000004C 9D                      	POPF
+    61 0000004D C3                      	RET
+    62                                  
+    63                                  bin2ascii:
+    64 0000004E 81FA0A00                	CMP		DX,10
+    65 00000052 7215                    	JB		Uni
+    66 00000054 81FA6400                	CMP		DX,100 
+    67 00000058 7216                    	JB		Des
+    68 0000005A 81FAE803                	CMP		DX,1000
+    69 0000005E 7221                    	JB		Cen
+    70 00000060 81FA1027                	CMP		DX,10000
+    71 00000064 723A                    	JB		Mil
+    72 00000066 E96500                  	JMP		Dezmil
+    73                                  			
+    74                                  Uni:	
+    75 00000069 81C23000                	ADD		DX,0x0030
+    76 0000006D 8815                    	MOV 	byte [DI],DL
+    77 0000006F C3                      	RET
+    78                                  Des:
+    79 00000070 89D0                    	MOV 	AX,DX
+    80 00000072 B30A                    	MOV		BL,10
+    81 00000074 F6F3                    	DIV		BL
+    82 00000076 80C430                  	ADD		AH,0x30
+    83 00000079 0430                    	ADD		AL,0x30
+    84 0000007B 8805                    	MOV 	byte [DI],AL
+    85 0000007D 886501                  	MOV 	byte [DI+1],AH
+    86 00000080 C3                      	RET
+    87                                  Cen:		
+    88 00000081 89D0                    	MOV 	AX,DX
+    89 00000083 B364                    	MOV		BL,100
+    90 00000085 F6F3                    	DIV		BL
+    91 00000087 0430                    	ADD		AL,0x30
+    92 00000089 8805                    	MOV 	byte [DI],AL
+    93 0000008B 88E0                    	MOV 	AL,AH
+    94 0000008D 25FF00                  	AND		AX,0x00FF
+    95 00000090 B30A                    	MOV		BL,10
+    96 00000092 F6F3                    	DIV		BL
+    97 00000094 80C430                  	ADD		AH,0x30
+    98 00000097 0430                    	ADD		AL,0x30
+    99 00000099 884501                  	MOV 	byte [DI+1],AL		
+   100 0000009C 886502                  	MOV 	byte [DI+2],AH
+   101 0000009F C3                      	RET
+   102                                  Mil:		
+   103 000000A0 89D0                    	MOV 	AX,DX
+   104 000000A2 BA0000                  	MOV     DX,0
+   105 000000A5 BBE803                  	MOV		BX,1000
+   106 000000A8 F7F3                    	DIV		BX
+   107 000000AA 0430                    	ADD		AL,0x30
+   108 000000AC 8805                    	MOV 	byte [DI],AL
+   109 000000AE 89D0                    	MOV 	AX,DX
+   110 000000B0 B364                    	MOV		BL,100
+   111 000000B2 F6F3                    	DIV		BL
+   112 000000B4 0430                    	ADD		AL,0x30
+   113 000000B6 884501                  	MOV 	byte [DI+1],AL		
+   114 000000B9 88E0                    	MOV 	AL,AH
+   115 000000BB 25FF00                  	AND     AX,0x00FF
+   116 000000BE B30A                    	MOV		BL,10
+   117 000000C0 F6F3                    	DIV		BL
+   118 000000C2 80C430                  	ADD		AH,0x30
+   119 000000C5 0430                    	ADD		AL,0x30
+   120 000000C7 884502                  	MOV 	byte [DI+2],AL		
+   121 000000CA 886503                  	MOV 	byte [DI+3],AH
+   122 000000CD C3                      	RET
+   123                                  Dezmil:
+   124 000000CE 89D0                    	MOV 	AX,DX
+   125 000000D0 BA0000                  	MOV     DX,0
+   126 000000D3 BB1027                  	MOV		BX,10000
+   127 000000D6 F7F3                    	DIV		BX
+   128 000000D8 0430                    	ADD		AL,0x30
+   129 000000DA 8805                    	MOV 	byte [DI],AL
+   130 000000DC 89D0                    	MOV		AX,DX		
+   131 000000DE BA0000                  	MOV     DX,0
+   132 000000E1 BBE803                  	MOV		BX,1000
+   133 000000E4 F7F3                    	DIV		BX
+   134 000000E6 0430                    	ADD		AL,0x30
+   135 000000E8 884501                  	MOV 	byte [DI+1],AL
+   136 000000EB 89D0                    	MOV 	AX,DX
+   137 000000ED B364                    	MOV		BL,100
+   138 000000EF F6F3                    	DIV		BL
+   139 000000F1 0430                    	ADD		AL,0x30
+   140 000000F3 884502                  	MOV 	byte [DI+2],AL		
+   141 000000F6 88E0                    	MOV 	AL,AH
+   142 000000F8 25FF00                  	AND     AX,0x00FF
+   143 000000FB B30A                    	MOV		BL,10
+   144 000000FD F6F3                    	DIV		BL
+   145 000000FF 80C430                  	ADD		AH,0x30
+   146 00000102 0430                    	ADD		AL,0x30
+   147 00000104 884503                  	MOV 	byte [DI+3],AL		
+   148 00000107 886504                  	MOV 	byte [DI+4],AH
+   149 0000010A C3                      	RET
+   150                                  		
+   151                                  segment dados ;segmento de dados inicializados
+   152                                  CR 			EQU		13
+   153                                  LF 			EQU		10
+   154 00000000 50726F6772616D6120-     mensini: 	db 'Programa que calcula a Serie de Fibonacci. ',CR,LF,'$'
+   155 00000009 7175652063616C6375-
+   156 00000012 6C6120612053657269-
+   157 0000001B 65206465204669626F-
+   158 00000024 6E616363692E200D0A-
+   159 0000002D 24                 
+   160 0000002E 46696D206461207365-     mensfim: 	db 'Fim da serie!!',CR,LF,'$'
+   161 00000037 72696521210D0A24   
+   162                                  
+   163                                  ;saida: 		db '00000',CR,LF,'$'
+   164 0000003F <res 00000005>          saida: 		resb 5 
+   165 00000044 0D0A24                              db CR,LF,'$'
+   166                                  
+   167                                  segment stack stack
+   168 00000000 <res 00000100>          resb 256 ; reserva 256 bytes para formar a pilha
+   169                                  stacktop:
