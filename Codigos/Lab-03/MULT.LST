@@ -1,0 +1,49 @@
+     1                                  segment code
+     2                                  ..start:
+     3                                  ; iniciar os registros de segmento DS e SS e o ponteiro de pilha SP
+     4 00000000 B8[0000]                    mov     ax,data
+     5 00000003 8ED8                        mov     ds,ax
+     6 00000005 B8[0000]                    mov     ax,stack
+     7 00000008 8ED0                        mov     ss,ax
+     8 0000000A BC[0001]                    mov     sp,stacktop
+     9 0000000D 8B0E[1800]                  mov     cx,[size]
+    10                                  ; iniciar o codigo do programa
+    11                                  
+    12                                      MULTIPLICACAO:  
+    13 00000011 8B1E[1A00]                      mov bx, [index_vetores]         ; Posição inicial dos dois vetores
+    14 00000015 8B87[0000]                      mov ax, [Vet1+bx]               ; Multiplicando
+    15 00000019 8B9F[0600]                      mov bx, [Vet2+bx]               ; Multiplicador
+    16 0000001D F7E3                            mul bx                          ; Execulta multiplicação colocando em Ax e Dx o resultado
+    17                                  
+    18 0000001F 8B1E[1C00]                      mov bx, [inde_result]           ; Posição inicial do resultado
+    19 00000023 8987[0C00]                      mov word [resultado+bx], ax     ; Coloca o resuldado da multiplicação no endereço de resultado
+    20 00000027 8997[0E00]                      mov word [resultado+bx+2], dx   ; 
+    21                                  
+    22                                          ; Incrementa os contadores
+    23 0000002B 8B1E[1A00]                      mov bx, [index_vetores]
+    24 0000002F 81C30200                        add bx, 2			            ; anda para a próxima possição dos vetores
+    25 00000033 891E[1A00]                      mov [index_vetores], bx
+    26                                  
+    27 00000037 8B1E[1C00]                      mov bx, [inde_result]
+    28 0000003B 81C30400                        add bx, 4				        ; anda para a próxima possição do resultado incrementa duas vezes pois o word é duplo
+    29 0000003F 891E[1C00]                      mov [inde_result], bx
+    30                                  
+    31 00000043 E2CC                        loop MULTIPLICACAO
+    32 00000045 CD03                        int 3
+    33                                  
+    34                                  ; Terminar o programa e voltar para o sistema operacional
+    35 00000047 B44C                    mov        ah,4ch
+    36 00000049 CD21                    int     21h
+    37                                  
+    38                                  segment data
+    39 00000000 020004000600                Vet1                dw    2, 4, 6
+    40 00000006 050007001900                Vet2                dw    5, 7, 25
+    41 0000000C <res 0000000C>              resultado           resw 6
+    42                                  
+    43 00000018 0300                        size                dw  3
+    44 0000001A 0000                        index_vetores       dw  0
+    45 0000001C 0000                        inde_result         dw  0
+    46                                  
+    47                                  segment stack stack
+    48 00000000 <res 00000100>              resb 256
+    49                                  stacktop:
