@@ -1,0 +1,68 @@
+     1                                  segment code
+     2                                  ..start:
+     3 00000000 B8[0000]                	mov ax, dados
+     4 00000003 8ED8                    	mov ds, ax
+     5 00000005 B8[0000]                	mov ax, stack
+     6 00000008 8ED0                    	mov ss,ax
+     7 0000000A BC[0001]                	mov sp,stacktop
+     8                                   
+     9                                   ; AQUI COMECA A EXECUCAO DO PROGRAMA PRINCIPAL
+    10 0000000D BA[0000]                	mov dx,mensini ; mensagem de inicio
+    11 00000010 B409                    	mov ah,9
+    12 00000012 CD21                    	int 21h
+    13                                  	
+    14 00000014 B80000                  	mov ax,0 ; primeiro elemento da série
+    15 00000017 BB0100                  	mov bx,1 ; segundo elemento da série
+    16                                  	
+    17                                  	L10:
+    18 0000001A 89C2                    		mov dx,ax
+    19 0000001C 01DA                    		add dx,bx ; calcula novo elemento da série
+    20 0000001E 89D8                    		mov ax,bx
+    21 00000020 89D3                    		mov bx,dx
+    22 00000022 81FA0080                		cmp dx, 0x8000
+    23 00000026 72F2                    	jb L10
+    24                                  
+    25                                  	;bin2ascii:
+    26                                  	;	cmp dx,10
+    27                                  	;	jb	Uni
+    28                                  	;	
+    29                                  	;	cmp dx,100
+    30                                  	;	jb	Des
+    31                                  	;	
+    32                                  	;	cmp dx,1000
+    33                                  	;	jb	Cen
+    34                                  	;	
+    35                                  	;	cmp dx,10000
+    36                                  	;	jb	Mil
+    37                                  	;	
+    38                                  	;	jb	Dezmil
+    39                                  	
+    40                                  	exit:
+    41 00000028 BA[2E00]                	mov dx,mensfim ; mensagem de inicio
+    42 0000002B B409                    	mov ah,9
+    43 0000002D CD21                    	int 21h
+    44                                  	
+    45 0000002F BA[3400]                	mov dx,saida ; mensagem de inicio
+    46 00000032 B409                    	mov ah,9
+    47 00000034 CD21                    	int 21h
+    48                                  	
+    49 00000036 CD03                    	int 3
+    50                                  
+    51                                  	; AQUI TERMINA A EXECUCAO DO PROGRAMA PRINCIPAL
+    52                                  	quit:
+    53 00000038 B44C                    	mov ah,4CH ; retorna para o DOS com código 0
+    54 0000003A CD21                    	int 21h
+    55                                   
+    56                                   segment dados ;segmento de dados inicializados
+    57 00000000 50726F6772616D6120-     	mensini: 	db 'Programa que calcula a Serie de Fibonacci. ',13,10,'$'
+    58 00000009 7175652063616C6375-
+    59 00000012 6C6120612053657269-
+    60 0000001B 65206465204669626F-
+    61 00000024 6E616363692E200D0A-
+    62 0000002D 24                 
+    63 0000002E 6279650D0A24            	mensfim: 	db 'bye',13,10,'$'
+    64 00000034 30303030300D0A24        	saida: 		db '00000',13,10,'$'
+    65                                  	segment stack stack
+    66                                  	
+    67 00000000 <res 00000100>          	resb 256 ; reserva 256 bytes para formar a pilha
+    68                                  	stacktop: ; posição de memória que indica o topo da pilha=SP
