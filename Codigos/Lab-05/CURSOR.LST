@@ -1,0 +1,31 @@
+     1                                  ;
+     2                                  ;Funcao cursor
+     3                                  ;
+     4                                  ; dh = linha (0-29) e  dl=coluna  (0-79)
+     5                                  global cursor
+     6                                  
+     7                                  cursor:
+     8                                  ;Salvando o contexto, empilhando registradores
+     9 00000000 9C                      		PUSHF
+    10 00000001 50                      		PUSH 	AX
+    11 00000002 53                      		PUSH 	BX
+    12 00000003 51                      		PUSH	CX
+    13 00000004 52                      		PUSH	DX
+    14 00000005 56                      		PUSH	SI
+    15 00000006 57                      		PUSH	DI
+    16 00000007 55                      		PUSH	BP
+    17                                  ;Preparando para chamar a int 10h	        	
+    18 00000008 B402                    		MOV     AH,2        ;INT 10h/AH = 2 - set cursor position.
+    19 0000000A B700                    		MOV     BH,0        ;BH = page number (0..7).
+    20                                                              ;DL = column.		
+    21 0000000C CD10                    		INT     10h
+    22                                  ;Recupera-se o contexto			
+    23 0000000E 5D                      		POP		BP
+    24 0000000F 5F                      		POP		DI
+    25 00000010 5E                      		POP		SI
+    26 00000011 5A                      		POP		DX
+    27 00000012 59                      		POP		CX
+    28 00000013 5B                      		POP		BX
+    29 00000014 58                      		POP		AX
+    30 00000015 9D                      		POPF
+    31 00000016 C3                      		RET

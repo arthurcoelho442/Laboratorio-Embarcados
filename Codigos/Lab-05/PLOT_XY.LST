@@ -1,0 +1,36 @@
+     1                                  ;Funcao plot_xy
+     2                                  ;
+     3                                  ; push x; push y; call plot_xy;  (x<639, y<479)
+     4                                  ; cor definida na variavel cor
+     5                                  global plot_xy
+     6                                  extern cor
+     7                                  
+     8                                  plot_xy:
+     9 00000000 55                      		PUSH    BP
+    10 00000001 89E5                    		MOV		BP,SP
+    11                                  ;Salvando o contexto, empilhando registradores		
+    12 00000003 9C                      		PUSHF
+    13 00000004 50                      		PUSH 	AX
+    14 00000005 53                      		PUSH 	BX
+    15 00000006 51                      		PUSH	CX
+    16 00000007 52                      		PUSH	DX
+    17 00000008 56                      		PUSH	SI
+    18 00000009 57                      		PUSH	DI
+    19                                  ;Preparando para chamar a int 10h	    
+    20 0000000A B40C                    	    MOV     AH,0Ch      ;INT 10h/AH = 0Ch - change color for a single pixel.
+    21 0000000C A0[0000]                	    MOV     AL,[cor]    ;AL = pixel color    
+    22 0000000F B700                    	    MOV     BH,0
+    23 00000011 BADF01                  	    MOV     DX,479
+    24 00000014 2B5604                  		SUB		DX,[BP+4]   ;DX = row
+    25 00000017 8B4E06                  	    MOV     CX,[BP+6]   ;CX = column - Load in AX
+    26 0000001A CD10                    	    INT     10h
+    27                                  ;Recupera-se o contexto		
+    28 0000001C 5F                      		POP     DI
+    29 0000001D 5E                      		POP		SI
+    30 0000001E 5A                      		POP		DX
+    31 0000001F 59                      		POP		CX
+    32 00000020 5B                      		POP		BX
+    33 00000021 58                      		POP		AX
+    34 00000022 9D                      		POPF
+    35 00000023 5D                      		POP		BP
+    36 00000024 C20400                  		RET		4			;Add 4 cause row and column were updated before to enter in the function

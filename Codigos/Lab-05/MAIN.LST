@@ -1,0 +1,325 @@
+     1                                  ; versão de 18/10/2022
+     2                                  ; Uso de diretivas extern e global 
+     3                                  ; Professor Camilo Diaz
+     4                                  
+     5                                  extern line, square, full_circle, circle, cursor, caracter, plot_xy, delay
+     6                                  global cor, velocidade
+     7                                  
+     8                                  segment code
+     9                                  
+    10                                  ;org 100h
+    11                                  ..start:
+    12 00000000 B8[0000]                	MOV     AX,data			;Inicializa os registradores
+    13 00000003 8ED8                    	MOV 	DS,AX
+    14 00000005 B8[0000]                	MOV 	AX,stack
+    15 00000008 8ED0                    	MOV 	SS,AX
+    16 0000000A BC[0200]                	MOV 	SP,stacktop
+    17                                  
+    18                                  	;Salvar modo corrente de video(vendo como esta o modo de video da maquina)
+    19 0000000D B40F                    	MOV  	AH,0Fh
+    20 0000000F CD10                    	INT  	10h
+    21 00000011 A2[0200]                	MOV  	[modo_anterior],AL   
+    22                                  
+    23                                  	;Alterar modo de video para grafico 640x480 16 cores
+    24 00000014 B012                    	MOV     AL,12h
+    25 00000016 B400                    	MOV     AH,0
+    26 00000018 CD10                    	INT     10h
+    27                                  		
+    28                                  	;desenha Retangulo
+    29 0000001A C606[0000]0F            	MOV		byte [cor],branco_intenso	;retangulo
+    30 0000001F B80000                  	MOV		AX,0                     	;x1
+    31 00000022 50                      	PUSH	AX
+    32 00000023 B80000                  	MOV		AX,0                    	;y1
+    33 00000026 50                      	PUSH	AX
+    34 00000027 A1[0D00]                	MOV		AX,	[x_canva]	            ;x2
+    35 0000002A 50                      	PUSH	AX
+    36 0000002B A1[0F00]                	MOV		AX, [y_canva]               ;y2
+    37 0000002E 50                      	PUSH	AX
+    38 0000002F E8(0000)                	CALL	square
+    39                                  
+    40                                  program:
+    41                                  	;	Desenha circulo Vermelho
+    42 00000032 C606[0000]04            	MOV		byte [cor],vermelho	;cabeça
+    43 00000037 A1[1100]                	MOV		AX , [x_pos]		;x
+    44 0000003A 50                      	PUSH	AX
+    45 0000003B A1[1300]                	MOV		AX , [y_pos]		;y
+    46 0000003E 50                      	PUSH	AX
+    47 0000003F A1[1500]                	MOV		AX , [raio_bola]	;r
+    48 00000042 50                      	PUSH	AX
+    49 00000043 E8(0000)                	CALL	full_circle
+    50                                  
+    51                                  	;	Delay
+    52 00000046 E8(0000)                	CALL	delay
+    53                                  	
+    54                                  	;	Desenha circulo Preto
+    55 00000049 C606[0000]00            	MOV		byte [cor],preto	;cabeça
+    56 0000004E A1[1100]                	MOV		AX , [x_pos]		;x
+    57 00000051 50                      	PUSH	AX
+    58 00000052 A1[1300]                	MOV		AX , [y_pos]		;y
+    59 00000055 50                      	PUSH	AX
+    60 00000056 A1[1500]                	MOV		AX , [raio_bola]	;r
+    61 00000059 50                      	PUSH	AX
+    62 0000005A E8(0000)                	CALL	full_circle
+    63                                  	
+    64 0000005D E82500                  	CALL 	adjust_direction
+    65                                  
+    66                                  	; 	Verifica Termino do Programa
+    67 00000060 E90000                  	JMP 	verify
+    68                                  
+    69                                  verify:
+    70 00000063 B40B                        mov     ah,0bh
+    71 00000065 CD21                        int     21h         ; Le buffer de teclado
+    72 00000067 3C00                        cmp     al,0        ; Se AL =0 nada foi digitado. Se AL =255 então há algum caracter na STDIN
+    73 00000069 7503                        jne     escape
+    74 0000006B E9C4FF                      jmp     program      ; se AL = 0 então nada foi digitado e a animação do jogo deve continuar
+    75                                  
+    76                                  escape:
+    77 0000006E B408                        mov     ah, 08H     ; Ler caracter da STDIN
+    78 00000070 CD21                        int     21H
+    79 00000072 3C1B                        cmp     al, 27      ; Verifica se foi Esc. Se foi, finaliza o programa
+    80 00000074 75BC                        jne     program
+    81 00000076 E90000                      jmp     finish
+    82                                  
+    83                                  finish:
+    84 00000079 B400                        mov  	ah,0    			; set video mode
+    85 0000007B A0[0200]                    mov  	al,[modo_anterior]  ; modo anterior
+    86 0000007E CD10                        int  	10h
+    87 00000080 B8004C                      mov     ax,4c00h
+    88 00000083 CD21                        int     21h
+    89                                  
+    90                                  adjust_direction:
+    91                                  	; Ajusta a direção
+    92 00000085 803E[0100]0A            	CMP		byte[direcao], angulo45
+    93 0000008A 7504                    	JNE		J135
+    94 0000008C E81C00                  	CALL	adjustment_45
+    95 0000008F C3                      	RET
+    96                                  	J135:
+    97 00000090 C3                      		RET
+    98 00000091 803E[0100]06             		CMP		byte[direcao], angulo135
+    99 00000096 7504                    		JNE		J225
+   100 00000098 E83500                  		CALL	adjustment_135
+   101 0000009B C3                      		RET
+   102                                  	J225:
+   103 0000009C 803E[0100]05            		CMP		byte[direcao], angulo225
+   104 000000A1 7504                    		JNE		J315
+   105 000000A3 E87300                  		CALL	adjustment_225
+   106 000000A6 C3                      		RET	
+   107                                  	J315:
+   108 000000A7 E89400                  		CALL	adjustment_315
+   109 000000AA C3                      		RET
+   110                                  
+   111                                  adjustment_45:
+   112                                  	; Pega posição atual
+   113 000000AB E8B500                  	CALL	current_position
+   114                                  	
+   115 000000AE 031E[1500]              	ADD		BX, [raio_bola]
+   116 000000B2 030E[1500]              	ADD		CX, [raio_bola]
+   117                                  
+   118                                  	; Comparação X
+   119 000000B6 3B1E[0D00]              	CMP 	BX,		[x_canva]	; Compara no eixo X a posição da bolinha com o canva do jogo
+   120 000000BA 7442                    	JE		R135				; Ajusta posição para 135° caso bata na parede Direita
+   121                                  	; Comparação Y
+   122 000000BC 3B0E[0F00]              	CMP 	CX,		[y_canva]	; Compara no eixo Y a posição da bolinha com o canva do jogo
+   123 000000C0 744E                    	JE		R315				; Ajusta posição para 315° caso bata no Teto
+   124                                  	
+   125                                  	; Anda em 45°
+   126 000000C2 43                      	INC 	BX
+   127 000000C3 41                      	INC 	CX
+   128                                  
+   129                                  	; Remove Raio
+   130 000000C4 2B1E[1500]              	SUB		BX, [raio_bola]
+   131 000000C8 2B0E[1500]              	SUB		CX, [raio_bola]
+   132                                  
+   133 000000CC E89D00                  	CALL	save_position
+   134 000000CF C3                      	RET
+   135                                  
+   136                                  adjustment_135:
+   137                                  	; Pega posição atual
+   138 000000D0 E89000                  	CALL	current_position
+   139                                  	
+   140 000000D3 2B1E[1500]              	SUB		BX, [raio_bola]
+   141 000000D7 030E[1500]              	ADD		CX, [raio_bola]
+   142                                  
+   143                                  	; Comparação X
+   144 000000DB 81FB0000                	CMP 	BX,		0			; Compara no eixo X a posição da bolinha com o canva do jogo
+   145 000000DF 7414                    	JE		R45					; Ajusta posição para 135° caso bata na parede Esquerda
+   146                                  	; Comparação Y
+   147 000000E1 3B0E[0F00]              	CMP 	CX,		[y_canva]	; Compara no eixo Y a posição da bolinha com o canva do jogo
+   148 000000E5 7420                    	JE		R225				; Ajusta posição para 315° caso bata no Teto
+   149                                  
+   150                                  	; Anda em 135°
+   151 000000E7 4B                      	DEC 	BX
+   152 000000E8 41                      	INC 	CX
+   153                                  
+   154                                  	; Remove Raio
+   155 000000E9 031E[1500]              	ADD		BX, [raio_bola]
+   156 000000ED 2B0E[1500]              	SUB		CX, [raio_bola]
+   157                                  
+   158 000000F1 E87800                  	call save_position
+   159 000000F4 C3                      	RET
+   160                                  
+   161                                  R45:
+   162 000000F5 C606[0100]0A            	MOV		byte[direcao], angulo45
+   163 000000FA E888FF                  	CALL	adjust_direction
+   164 000000FD C3                      	RET
+   165                                  R135:
+   166 000000FE C606[0100]06            	MOV		byte[direcao], angulo135
+   167 00000103 E87FFF                  	CALL	adjust_direction
+   168 00000106 C3                      	RET
+   169                                  R225:
+   170 00000107 C606[0100]05            	MOV		byte[direcao], angulo225
+   171 0000010C E876FF                  	CALL	adjust_direction
+   172 0000010F C3                      	RET
+   173                                  R315:
+   174 00000110 C606[0100]09            	MOV		byte[direcao], angulo315
+   175 00000115 E86DFF                  	CALL	adjust_direction
+   176 00000118 C3                      	RET
+   177                                  
+   178                                  adjustment_225:
+   179                                  	; Pega posição atual
+   180 00000119 E84700                  	CALL	current_position
+   181                                  	
+   182 0000011C 2B1E[1500]              	SUB		BX, [raio_bola]
+   183 00000120 2B0E[1500]              	SUB		CX, [raio_bola]
+   184                                  
+   185                                  	; Comparação X
+   186 00000124 81FB0000                	CMP 	BX,		0			; Compara no eixo X a posição da bolinha com o canva do jogo
+   187 00000128 74E6                    	JE		R315				; Ajusta posição para 135° caso bata na parede Esquerda
+   188                                  	; Comparação Y
+   189 0000012A 81F90000                	CMP 	CX,		0			; Compara no eixo Y a posição da bolinha com o canva do jogo
+   190 0000012E 74CE                    	JE		R135					; Ajusta posição para 315° caso bata no Base
+   191                                  
+   192                                  	; Anda em 225°
+   193 00000130 4B                      	DEC 	BX
+   194 00000131 49                      	DEC 	CX
+   195                                  
+   196                                  	; Remove Raio
+   197 00000132 031E[1500]              	ADD		BX, [raio_bola]
+   198 00000136 030E[1500]              	ADD		CX, [raio_bola]
+   199                                  
+   200 0000013A E82F00                  	call save_position
+   201 0000013D C3                      	RET
+   202                                  adjustment_315:
+   203                                  	; Pega posição atual
+   204 0000013E E82200                  	CALL	current_position
+   205                                  	
+   206 00000141 031E[1500]              	ADD		BX, [raio_bola]
+   207 00000145 2B0E[1500]              	SUB		CX, [raio_bola]
+   208                                  
+   209                                  	; Comparação X
+   210 00000149 3B1E[0D00]              	CMP 	BX,		[x_canva]	; Compara no eixo X a posição da bolinha com o canva do jogo
+   211 0000014D 74B8                    	JE		R225				; Ajusta posição para 135° caso bata na parede Direita
+   212                                  	; Comparação Y
+   213 0000014F 81F90000                	CMP 	CX,		0			; Compara no eixo Y a posição da bolinha com o canva do jogo
+   214 00000153 74A0                    	JE		R45					; Ajusta posição para 315° caso bata no Base
+   215                                  
+   216                                  	; Anda em 315°
+   217 00000155 43                      	INC 	BX
+   218 00000156 49                      	DEC 	CX
+   219                                  
+   220                                  	; Remove Raio
+   221 00000157 2B1E[1500]              	SUB		BX, [raio_bola]
+   222 0000015B 030E[1500]              	ADD		CX, [raio_bola]
+   223                                  
+   224 0000015F E80A00                  	call save_position
+   225 00000162 C3                      	RET
+   226                                  
+   227                                  current_position:
+   228                                  	; Posição atual bolinha
+   229 00000163 8B1E[1100]              	MOV		BX, [x_pos] ; x
+   230 00000167 8B0E[1300]              	MOV		CX, [y_pos] ; y
+   231 0000016B C3                      	RET
+   232                                  
+   233                                  save_position:
+   234                                  	; Salva posição
+   235 0000016C 891E[1100]              	MOV 	[x_pos], BX
+   236 00000170 890E[1300]              	MOV 	[y_pos], CX
+   237 00000174 C3                      	RET
+   238                                  ;*******************************************************************
+   239                                  
+   240                                  segment data
+   241                                  
+   242 00000000 0F                      cor		db		branco_intenso
+   243                                  
+   244                                  ;	I R G B COR
+   245                                  ;	0 0 0 0 preto
+   246                                  ;	0 0 0 1 azul
+   247                                  ;	0 0 1 0 verde
+   248                                  ;	0 0 1 1 cyan
+   249                                  ;	0 1 0 0 vermelho
+   250                                  ;	0 1 0 1 magenta
+   251                                  ;	0 1 1 0 marrom
+   252                                  ;	0 1 1 1 branco
+   253                                  ;	1 0 0 0 cinza
+   254                                  ;	1 0 0 1 azul claro
+   255                                  ;	1 0 1 0 verde claro
+   256                                  ;	1 0 1 1 cyan claro
+   257                                  ;	1 1 0 0 rosa
+   258                                  ;	1 1 0 1 magenta claro
+   259                                  ;	1 1 1 0 amarelo
+   260                                  ;	1 1 1 1 branco intenso
+   261                                  
+   262                                  preto		    equ		0
+   263                                  azul		    equ		1
+   264                                  verde		    equ		2
+   265                                  cyan		    equ		3
+   266                                  vermelho	    equ		4
+   267                                  magenta		    equ		5
+   268                                  marrom		    equ		6
+   269                                  branco		    equ		7
+   270                                  cinza		    equ		8
+   271                                  azul_claro	    equ		9
+   272                                  verde_claro	    equ		10
+   273                                  cyan_claro	    equ		11
+   274                                  rosa		    equ		12
+   275                                  magenta_claro	equ		13
+   276                                  amarelo		    equ		14
+   277                                  branco_intenso	equ		15
+   278                                  
+   279 00000001 0A                      direcao			db		10
+   280                                  ;
+   281                                  ; D = Direita
+   282                                  ; E = Esquerda
+   283                                  ; C = Cima
+   284                                  ; B = Baixo
+   285                                  ;
+   286                                  ; 	D E C B DIRECAO
+   287                                  ;;;;;;;;;;;;;;;
+   288                                  ;	1 0 1 0  /|
+   289                                  ;			/
+   290                                  ;;;;;;;;;;;;;;;
+   291                                  ;	1 0 0 1 \
+   292                                  ;			 \|
+   293                                  ;;;;;;;;;;;;;;;
+   294                                  ;	0 1 1 0 |\
+   295                                  ;			  \
+   296                                  ;;;;;;;;;;;;;;;
+   297                                  ;	0 1 0 1   /
+   298                                  ;			|/
+   299                                  ;;;;;;;;;;;;;;;
+   300                                  
+   301                                  angulo45		equ		10
+   302                                  angulo315		equ		9
+   303                                  angulo135		equ		6
+   304                                  angulo225		equ		5
+   305                                  
+   306 00000002 00                      modo_anterior	db		0
+   307 00000003 0000                    linha   	    dw  	0
+   308 00000005 0000                    coluna  	    dw  	0
+   309 00000007 0000                    deltax		    dw		0
+   310 00000009 0000                    deltay		    dw		0	
+   311                                  
+   312 0000000B 0100                    velocidade      dw      1
+   313                                  
+   314 0000000D 7F02                    x_canva			dw		639
+   315 0000000F DF01                    y_canva			dw		479
+   316                                  
+   317 00000011 4001                    x_pos			dw		320
+   318 00000013 F000                    y_pos			dw		240
+   319                                  
+   320 00000015 0A00                    raio_bola		dw		10
+   321                                  
+   322                                  ;*************************************************************************
+   323                                  segment stack stack
+   324 00000000 0002                    		DW 		512
+   325                                  stacktop:

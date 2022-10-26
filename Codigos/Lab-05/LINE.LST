@@ -1,0 +1,226 @@
+     1                                  ;-----------------------------------------------------------------------------
+     2                                  ;
+     3                                  ; Função line
+     4                                  ; PUSH x1; PUSH y1; PUSH x2; PUSH y2; call line;  (x<639, y<479)
+     5                                  ;
+     6                                  global line
+     7                                  extern plot_xy
+     8                                  line:
+     9 00000000 55                      		PUSH 	BP
+    10 00000001 89E5                    	    MOV	 	BP,SP
+    11                                  		;Salvando o contexto, empilhando registradores		
+    12 00000003 9C                      	    PUSHF
+    13 00000004 50                      		PUSH 	AX
+    14 00000005 53                      		PUSH 	BX
+    15 00000006 51                      		PUSH	CX
+    16 00000007 52                      		PUSH	DX
+    17 00000008 56                      		PUSH	SI
+    18 00000009 57                      		PUSH	DI
+    19                                  		;Resgata os valores das coordenadas	previamente definidas antes de chamar a funcao line
+    20 0000000A 8B460A                  		MOV		AX,[bp+10]  ;x1
+    21 0000000D 8B5E08                  		MOV		BX,[bp+8]   ;y1 
+    22 00000010 8B4E06                  		MOV		CX,[bp+6]   ;x2 
+    23 00000013 8B5604                  		MOV		DX,[bp+4]   ;y2
+    24                                  		
+    25 00000016 39C8                    		CMP		AX,CX       ;Compare x1 with x2 
+    26 00000018 7408                    		JE		lineV       ;Jump to Vertical Line
+    27                                  		
+    28 0000001A 721C                    		JB		line1       ;Jump if x1 < x2 
+    29                                  		
+    30 0000001C 91                      		XCHG	AX,CX       ;else, exchange x1 with x2,
+    31 0000001D 87DA                    		XCHG	BX,DX       ;and exchange y1 with y2,
+    32 0000001F E91600                  		JMP		line1
+    33                                  
+    34                                  ;---------------- Vertical line ------------------------------
+    35                                  lineV:		                ;DeltAX=0
+    36 00000022 39D3                    		CMP		BX,DX       ;Compare y1 with y2                   |
+    37 00000024 7202                    		JB		lineVD      ;Jump if y1 < y2, down vertical line \|/ 
+    38 00000026 87DA                    		XCHG	BX,DX       ;else, exchange y1 with y2, up vertical line /|\        
+    39                                  lineVD:	                    ;                                             |
+    40 00000028 50                      		PUSH	AX          ;column
+    41 00000029 53                      		PUSH	BX          ;row
+    42 0000002A E8(0000)                		CALL 	plot_xy
+    43                                  		
+    44 0000002D 39D3                    		CMP		BX,DX       ;Compare y1 with y2
+    45 0000002F 7503                    		JNE		IncLineV    ;if not equal, jump to increase pixel
+    46 00000031 E9C600                  		JMP		End_line    ;else jump fim_line
+    47                                  IncLineV:	
+    48 00000034 43                              INC		BX
+    49 00000035 E9F0FF                  		JMP		lineVD
+    50                                  
+    51                                  ;---------------- Horizotnal line ----------------------------
+    52                                  ;DeltAX <,=,>0
+    53                                  line1:
+    54                                  ;Compare modulus DeltAX & Deltay due to CX > AX -> x2 > x1
+    55 00000038 51                      		PUSH	CX          ;Save x2 in stack
+    56 00000039 29C1                    		SUB		CX,AX       ;CX = CX-AX -> x2 = x2-x1 -> DeltAX
+    57 0000003B 890E[0600]              		MOV		[deltax],CX ;Save deltAX
+    58 0000003F 59                      		POP		CX          ;CX = x2
+    59                                  		
+    60 00000040 52                      		PUSH	DX          ;Save y2 in stack		
+    61 00000041 29DA                    		SUB		DX,BX       ;DX = DX-BX -> y2 = y2-y1 -> Deltay \
+    62 00000043 7702                    		JA		line32      ;Jump if DX > BX -> y2 > y1          \|
+    63 00000045 F7DA                    		NEG		DX          ;else, invert DX                                   --
+    64                                  
+    65                                  ;y = -mx+b 
+    66                                  line32:		
+    67 00000047 8916[0800]              		MOV		[deltay],DX ;Save deltay
+    68 0000004B 5A                      		POP		DX          ;DX = y2
+    69                                  
+    70 0000004C 50                      		PUSH	AX          ;Save x2 in stack
+    71 0000004D A1[0600]                		MOV		AX,[deltax] ;Compare DeltAX with DeltaY
+    72 00000050 3B06[0800]              		CMP		AX,[deltay]
+    73 00000054 58                      		POP		AX          ;AX = x2
+    74 00000055 724D                    		JB		line5       ;Jump if DeltAX < DeltaY
+    75                                  
+    76                                  	; CX > AX e deltAX>deltay
+    77 00000057 51                      		PUSH	CX
+    78 00000058 29C1                    		SUB		CX,AX
+    79 0000005A 890E[0600]              		MOV		[deltax],CX
+    80 0000005E 59                      		POP		CX
+    81 0000005F 52                      		PUSH	DX
+    82 00000060 29DA                    		SUB		DX,BX
+    83 00000062 8916[0800]              		MOV		[deltay],DX
+    84 00000066 5A                      		POP		DX
+    85                                  
+    86 00000067 89C6                    		MOV		SI,AX
+    87                                  line4:
+    88 00000069 50                      		PUSH	AX
+    89 0000006A 52                      		PUSH	DX
+    90 0000006B 56                      		PUSH	SI
+    91 0000006C 29C6                    		SUB		SI,AX	;(x-x1)
+    92 0000006E A1[0800]                		MOV		AX,[deltay]
+    93 00000071 F7EE                    		IMUL		SI
+    94 00000073 8B36[0600]              		MOV		SI,[deltax]		;arredondar
+    95 00000077 D1EE                    		SHR		SI,1
+    96                                  ; se numerador (DX)>0 soma se <0 SUBtrai
+    97 00000079 81FA0000                		cmp		DX,0
+    98 0000007D 7C09                    		JL		ar1
+    99 0000007F 01F0                    		ADD		AX,SI
+   100 00000081 81D20000                		ADC		DX,0
+   101 00000085 E90600                  		JMP		arc1
+   102 00000088 29F0                    ar1:	SUB		AX,SI
+   103 0000008A 81DA0000                		sbb		DX,0
+   104                                  arc1:
+   105 0000008E F73E[0600]              		idiv    word[deltax]
+   106 00000092 01D8                    		ADD		AX,BX
+   107 00000094 5E                      		POP		SI
+   108 00000095 56                      		PUSH	SI
+   109 00000096 50                      		PUSH	AX
+   110 00000097 E8(0000)                		call	plot_xy
+   111 0000009A 5A                      		POP		DX
+   112 0000009B 58                      		POP		AX
+   113 0000009C 39CE                    		cmp		SI,CX
+   114 0000009E 745A                    		je		End_line
+   115 000000A0 46                      		inc		SI
+   116 000000A1 E9C5FF                  		JMP		line4
+   117                                                                  ;                         --
+   118 000000A4 39D3                    line5:	cmp		BX,DX           ;Compare y1 with y2       /|
+   119 000000A6 7203                    		jb 		line7           ;Jump if y1 < y2 -> line /
+   120 000000A8 91                      		xchg	AX,CX       ;else 
+   121 000000A9 87DA                    		xchg	BX,DX
+   122                                  line7:                          
+   123 000000AB 51                      		PUSH	CX
+   124 000000AC 29C1                    		SUB		CX,AX
+   125 000000AE 890E[0600]              		MOV		word[deltax],CX
+   126 000000B2 59                      		POP		CX
+   127 000000B3 52                      		PUSH	DX
+   128 000000B4 29DA                    		SUB		DX,BX
+   129 000000B6 8916[0800]              		MOV		[deltay],DX
+   130 000000BA 5A                      		POP		DX
+   131                                  
+   132 000000BB 89DE                    		MOV		SI,BX
+   133                                  line6:
+   134 000000BD 52                      		PUSH	DX
+   135 000000BE 56                      		PUSH	SI
+   136 000000BF 50                      		PUSH	AX
+   137 000000C0 29DE                    		SUB		SI,BX	;(y-y1)
+   138 000000C2 A1[0600]                		MOV		AX,[deltax]
+   139 000000C5 F7EE                    		IMUL		SI          ;SIgned multiply
+   140 000000C7 8B36[0800]              		MOV		SI,[deltay]		;arredondar
+   141 000000CB D1EE                    		SHR		SI,1            ;Shift operand1 Right
+   142                                  		
+   143                                  ; se numerador (DX)>0 soma se <0 SUBtrai
+   144 000000CD 81FA0000                		cmp		DX,0
+   145 000000D1 7C09                    		JL		ar2
+   146 000000D3 01F0                    		ADD		AX,SI
+   147 000000D5 81D20000                		ADC		DX,0
+   148 000000D9 E90600                  		JMP		arc2
+   149 000000DC 29F0                    ar2:	SUB		AX,SI
+   150 000000DE 81DA0000                		sbb		DX,0
+   151                                  arc2:
+   152 000000E2 F73E[0800]              		idiv    word[deltay]
+   153 000000E6 89C7                    		MOV		di,AX
+   154 000000E8 58                      		POP		AX
+   155 000000E9 01C7                    		ADD		di,AX
+   156 000000EB 5E                      		POP		SI
+   157 000000EC 57                      		PUSH	di
+   158 000000ED 56                      		PUSH	SI
+   159 000000EE E8(0000)                		call	plot_xy
+   160 000000F1 5A                      		POP		DX
+   161 000000F2 39D6                    		cmp		SI,DX
+   162 000000F4 7404                    		je		End_line
+   163 000000F6 46                      		inc		SI
+   164 000000F7 E9C3FF                  		JMP		line6
+   165                                  
+   166                                  End_line:
+   167 000000FA 5F                      		POP		DI
+   168 000000FB 5E                      		POP		SI
+   169 000000FC 5A                      		POP		DX
+   170 000000FD 59                      		POP		CX
+   171 000000FE 5B                      		POP		BX
+   172 000000FF 58                      		POP		AX
+   173 00000100 9D                      		POPF
+   174 00000101 5D                      		POP		BP
+   175 00000102 C20800                  		RET		8
+   176                                  
+   177                                  %include "Data.asm"
+   178                              <1> segment data
+   179                              <1> 
+   180 00000000 0F                  <1> cor		db		branco_intenso
+   181                              <1> 
+   182                              <1> ;	I R G B COR
+   183                              <1> ;	0 0 0 0 preto
+   184                              <1> ;	0 0 0 1 azul
+   185                              <1> ;	0 0 1 0 verde
+   186                              <1> ;	0 0 1 1 cyan
+   187                              <1> ;	0 1 0 0 vermelho
+   188                              <1> ;	0 1 0 1 magenta
+   189                              <1> ;	0 1 1 0 marrom
+   190                              <1> ;	0 1 1 1 branco
+   191                              <1> ;	1 0 0 0 cinza
+   192                              <1> ;	1 0 0 1 azul claro
+   193                              <1> ;	1 0 1 0 verde claro
+   194                              <1> ;	1 0 1 1 cyan claro
+   195                              <1> ;	1 1 0 0 rosa
+   196                              <1> ;	1 1 0 1 magenta claro
+   197                              <1> ;	1 1 1 0 amarelo
+   198                              <1> ;	1 1 1 1 branco intenso
+   199                              <1> 
+   200                              <1> preto		    equ		0
+   201                              <1> azul		    equ		1
+   202                              <1> verde		    equ		2
+   203                              <1> cyan		    equ		3
+   204                              <1> vermelho	    equ		4
+   205                              <1> magenta		    equ		5
+   206                              <1> marrom		    equ		6
+   207                              <1> branco		    equ		7
+   208                              <1> cinza		    equ		8
+   209                              <1> azul_claro	    equ		9
+   210                              <1> verde_claro	    equ		10
+   211                              <1> cyan_claro	    equ		11
+   212                              <1> rosa		    equ		12
+   213                              <1> magenta_claro	equ		13
+   214                              <1> amarelo		    equ		14
+   215                              <1> branco_intenso	equ		15
+   216                              <1> 
+   217 00000001 00                  <1> modo_anterior	db		0
+   218 00000002 0000                <1> linha   	    dw  	0
+   219 00000004 0000                <1> coluna  	    dw  	0
+   220 00000006 0000                <1> deltax		    dw		0
+   221 00000008 0000                <1> deltay		    dw		0	
+   222 0000000A 46756EC3A7C3A36F20- <1> mens    	    db  	'Função Gráfica Sistemas Embarcados I $' 
+   223 00000013 4772C3A16669636120- <1>
+   224 0000001C 53697374656D617320- <1>
+   225 00000025 456D6261726361646F- <1>
+   226 0000002E 7320492024          <1>

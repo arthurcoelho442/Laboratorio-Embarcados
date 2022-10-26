@@ -1,0 +1,132 @@
+     1                                  ;-----------------------------------------------------------------------------
+     2                                  ;    fun��o full_circle
+     3                                  ;	 PUSH xc; PUSH yc; PUSH r; CALL full_circle;  (xc+r<639,yc+r<479)e(xc-r>0,yc-r>0)
+     4                                  ; cor definida na variavel cor					  
+     5                                  global full_circle
+     6                                  extern line 
+     7                                  
+     8                                  full_circle:
+     9 00000000 55                      	PUSH 	bp
+    10 00000001 89E5                    	MOV	 	bp,sp
+    11 00000003 9C                      	PUSHf                        ;coloca os flags na pilha
+    12 00000004 50                      	PUSH 	ax
+    13 00000005 53                      	PUSH 	bx
+    14 00000006 51                      	PUSH	cx
+    15 00000007 52                      	PUSH	dx
+    16 00000008 56                      	PUSH	si
+    17 00000009 57                      	PUSH	di
+    18                                  
+    19 0000000A 8B4608                  	MOV		ax,[bp+8]    ; resgata xc
+    20 0000000D 8B5E06                  	MOV		bx,[bp+6]    ; resgata yc
+    21 00000010 8B4E04                  	MOV		cx,[bp+4]    ; resgata r
+    22                                  	
+    23 00000013 89DE                    	MOV		si,bx
+    24 00000015 29CE                    	SUB		si,cx
+    25 00000017 50                      	PUSH    ax			;coloca xc na pilha			
+    26 00000018 56                      	PUSH	si			;coloca yc-r na pilha
+    27 00000019 89DE                    	MOV		si,bx
+    28 0000001B 01CE                    	ADD		si,cx
+    29 0000001D 50                      	PUSH	ax		;coloca xc na pilha
+    30 0000001E 56                      	PUSH	si		;coloca yc+r na pilha
+    31 0000001F E8(0000)                	CALL line
+    32                                  	
+    33                                  		
+    34 00000022 89CF                    	MOV		di,cx
+    35 00000024 81EF0100                	SUB		di,1	 ;di=r-1
+    36 00000028 BA0000                  	MOV		dx,0  	;dx ser� a vari�vel x. cx � a variavel y
+    37                                  	
+    38                                  ;aqui em cima a l�gica foi invertida, 1-r => r-1
+    39                                  ;e as compara��es passaram a ser jl => JG, assim garante 
+    40                                  ;valores positivos para d
+    41                                  
+    42                                  stay_full:				;loop
+    43 0000002B 89FE                    	MOV		si,di
+    44 0000002D 81FE0000                	CMP		si,0
+    45 00000031 7F0E                    	JG		inf_full       ;caso d for menor que 0, seleciona pixel superior (n�o  SALta)
+    46 00000033 89D6                    	MOV		si,dx		;o jl � importante porque trata-se de conta com sinal
+    47 00000035 D1E6                    	SAL		si,1		;multiplica por doi (shift arithmetic left)
+    48 00000037 81C60300                	ADD		si,3
+    49 0000003B 01F7                    	ADD		di,si     ;nesse ponto d=d+2*dx+3
+    50 0000003D 42                      	INC		dx		;INCrementa dx
+    51 0000003E E90E00                  	JMP		plotar_full
+    52                                  inf_full:	
+    53 00000041 89D6                    	MOV		si,dx
+    54 00000043 29CE                    	SUB		si,cx  		;faz x - y (dx-cx), e SALva em di 
+    55 00000045 D1E6                    	SAL		si,1
+    56 00000047 81C60500                	ADD		si,5
+    57 0000004B 01F7                    	ADD		di,si		;nesse ponto d=d+2*(dx-cx)+5
+    58 0000004D 42                      	INC		dx		;INCrementa x (dx)
+    59 0000004E 49                      	DEC		cx		;DECrementa y (cx)
+    60                                  	
+    61                                  plotar_full:	
+    62 0000004F 89C6                    	MOV		si,ax
+    63 00000051 01CE                    	ADD		si,cx
+    64 00000053 56                      	PUSH	si		;coloca a abcisa y+xc na pilha			
+    65 00000054 89DE                    	MOV		si,bx
+    66 00000056 29D6                    	SUB		si,dx
+    67 00000058 56                      	PUSH    si		;coloca a ordenada yc-x na pilha
+    68 00000059 89C6                    	MOV		si,ax
+    69 0000005B 01CE                    	ADD		si,cx
+    70 0000005D 56                      	PUSH	si		;coloca a abcisa y+xc na pilha	
+    71 0000005E 89DE                    	MOV		si,bx
+    72 00000060 01D6                    	ADD		si,dx
+    73 00000062 56                      	PUSH    si		;coloca a ordenada yc+x na pilha	
+    74 00000063 E8(0000)                	CALL 	line
+    75                                  	
+    76 00000066 89C6                    	MOV		si,ax
+    77 00000068 01D6                    	ADD		si,dx
+    78 0000006A 56                      	PUSH	si		;coloca a abcisa xc+x na pilha			
+    79 0000006B 89DE                    	MOV		si,bx
+    80 0000006D 29CE                    	SUB		si,cx
+    81 0000006F 56                      	PUSH    si		;coloca a ordenada yc-y na pilha
+    82 00000070 89C6                    	MOV		si,ax
+    83 00000072 01D6                    	ADD		si,dx
+    84 00000074 56                      	PUSH	si		;coloca a abcisa xc+x na pilha	
+    85 00000075 89DE                    	MOV		si,bx
+    86 00000077 01CE                    	ADD		si,cx
+    87 00000079 56                      	PUSH    si		;coloca a ordenada yc+y na pilha	
+    88 0000007A E8(0000)                	CALL	line
+    89                                  	
+    90 0000007D 89C6                    	MOV		si,ax
+    91 0000007F 29D6                    	SUB		si,dx
+    92 00000081 56                      	PUSH	si		;coloca a abcisa xc-x na pilha			
+    93 00000082 89DE                    	MOV		si,bx
+    94 00000084 29CE                    	SUB		si,cx
+    95 00000086 56                      	PUSH    si		;coloca a ordenada yc-y na pilha
+    96 00000087 89C6                    	MOV		si,ax
+    97 00000089 29D6                    	SUB		si,dx
+    98 0000008B 56                      	PUSH	si		;coloca a abcisa xc-x na pilha	
+    99 0000008C 89DE                    	MOV		si,bx
+   100 0000008E 01CE                    	ADD		si,cx
+   101 00000090 56                      	PUSH    si		;coloca a ordenada yc+y na pilha	
+   102 00000091 E8(0000)                	CALL	line
+   103                                  	
+   104 00000094 89C6                    	MOV		si,ax
+   105 00000096 29CE                    	SUB		si,cx
+   106 00000098 56                      	PUSH	si		;coloca a abcisa xc-y na pilha			
+   107 00000099 89DE                    	MOV		si,bx
+   108 0000009B 29D6                    	SUB		si,dx
+   109 0000009D 56                      	PUSH    si		;coloca a ordenada yc-x na pilha
+   110 0000009E 89C6                    	MOV		si,ax
+   111 000000A0 29CE                    	SUB		si,cx
+   112 000000A2 56                      	PUSH	si		;coloca a abcisa xc-y na pilha	
+   113 000000A3 89DE                    	MOV		si,bx
+   114 000000A5 01D6                    	ADD		si,dx
+   115 000000A7 56                      	PUSH    si		;coloca a ordenada yc+x na pilha	
+   116 000000A8 E8(0000)                	CALL	line
+   117                                  	
+   118 000000AB 39D1                    	CMP		cx,dx
+   119 000000AD 7203                    	JB		fim_full_circle  ;se cx (y) est� abaixo de dx (x), termina     
+   120 000000AF E979FF                  	JMP		stay_full		;se cx (y) est� acima de dx (x), continua no loop
+   121                                  	
+   122                                  	
+   123                                  fim_full_circle:
+   124 000000B2 5F                      	POP		di
+   125 000000B3 5E                      	POP		si
+   126 000000B4 5A                      	POP		dx
+   127 000000B5 59                      	POP		cx
+   128 000000B6 5B                      	POP		bx
+   129 000000B7 58                      	POP		ax
+   130 000000B8 9D                      	POPf
+   131 000000B9 5D                      	POP		bp
+   132 000000BA C20600                  	ret		6

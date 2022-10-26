@@ -1,0 +1,147 @@
+     1                                  ;
+     2                                  ;Funaoo circle
+     3                                  ;push xc; push yc; push r; call circle;  (xc+r<639,yc+r<479)e(xc-r>0,yc-r>0)
+     4                                  ;cor definida na variavel cor
+     5                                  global circle
+     6                                  extern plot_xy
+     7                                  
+     8                                  circle:
+     9 00000000 55                      	    PUSH 	BP
+    10 00000001 89E5                    	    MOV	 	BP,SP
+    11                                  ;Salvando o contexto, empilhando registradores		
+    12 00000003 9C                      	    PUSHF
+    13 00000004 50                      		PUSH 	AX
+    14 00000005 53                      		PUSH 	BX
+    15 00000006 51                      		PUSH	CX
+    16 00000007 52                      		PUSH	DX
+    17 00000008 56                      		PUSH	SI
+    18 00000009 57                      		PUSH	DI
+    19                                  			
+    20 0000000A 8B4608                  	    mov		ax,[bp+8]    ; resgata xc
+    21 0000000D 8B5E06                  	    mov		bx,[bp+6]    ; resgata yc
+    22 00000010 8B4E04                  	    mov		cx,[bp+4]    ; resgata r
+    23                                  	
+    24 00000013 89DA                    	    mov 	DX,BX	
+    25 00000015 01CA                    	    add		DX,CX       ;ponto extremo superior
+    26 00000017 50                      	    push    ax			
+    27 00000018 52                      	    push	dx
+    28 00000019 E8(0000)                	    call plot_xy
+    29                                  	
+    30 0000001C 89DA                    	    mov		dx,bx
+    31 0000001E 29CA                    	    sub		dx,cx       ;ponto extremo inferior
+    32 00000020 50                      	    push    ax			
+    33 00000021 52                      	    push	dx
+    34 00000022 E8(0000)                	    call plot_xy
+    35                                  	
+    36 00000025 89C2                    	    mov 	dx,ax	
+    37 00000027 01CA                    	    add		dx,cx       ;ponto extremo direita
+    38 00000029 52                      	    push    dx			
+    39 0000002A 53                      	    push	bx
+    40 0000002B E8(0000)                	    call plot_xy
+    41                                  	
+    42 0000002E 89C2                    	    mov		dx,ax
+    43 00000030 29CA                    	    sub		dx,cx       ;ponto extremo esquerda
+    44 00000032 52                      	    push    dx			
+    45 00000033 53                      	    push	bx
+    46 00000034 E8(0000)                	    call plot_xy
+    47                                  		
+    48 00000037 89CF                    	    mov		di,cx
+    49 00000039 81EF0100                	    sub		di,1	 ;di=r-1
+    50 0000003D BA0000                  	    mov		dx,0  	;dx ser� a vari�vel x. cx � a variavel y
+    51                                  	
+    52                                  ;aqui em cima a l�gica foi invertida, 1-r => r-1
+    53                                  ;e as compara��es passaram a ser jl => jg, assim garante 
+    54                                  ;valores positivos para d
+    55                                  
+    56                                  stay:				;loop
+    57 00000040 89FE                    	mov		si,di
+    58 00000042 81FE0000                	cmp		si,0
+    59 00000046 7F0E                    	jg		inf       ;caso d for menor que 0, seleciona pixel superior (n�o  salta)
+    60 00000048 89D6                    	mov		si,dx		;o jl � importante porque trata-se de conta com sinal
+    61 0000004A D1E6                    	sal		si,1		;multiplica por doi (shift arithmetic left)
+    62 0000004C 81C60300                	add		si,3
+    63 00000050 01F7                    	add		di,si     ;nesse ponto d=d+2*dx+3
+    64 00000052 42                      	inc		dx		;incrementa dx
+    65 00000053 E90E00                  	jmp		plotar
+    66                                  inf:	
+    67 00000056 89D6                    	mov		si,dx
+    68 00000058 29CE                    	sub		si,cx  		;faz x - y (dx-cx), e salva em di 
+    69 0000005A D1E6                    	sal		si,1
+    70 0000005C 81C60500                	add		si,5
+    71 00000060 01F7                    	add		di,si		;nesse ponto d=d+2*(dx-cx)+5
+    72 00000062 42                      	inc		dx		;incrementa x (dx)
+    73 00000063 49                      	dec		cx		;decrementa y (cx)
+    74                                  	
+    75                                  plotar:	
+    76 00000064 89D6                    	mov		si,dx
+    77 00000066 01C6                    	add		si,ax
+    78 00000068 56                      	push    si			;coloca a abcisa x+xc na pilha
+    79 00000069 89CE                    	mov		si,cx
+    80 0000006B 01DE                    	add		si,bx
+    81 0000006D 56                      	push    si			;coloca a ordenada y+yc na pilha
+    82 0000006E E8(0000)                	call plot_xy		;toma conta do segundo octante
+    83 00000071 89C6                    	mov		si,ax
+    84 00000073 01D6                    	add		si,dx
+    85 00000075 56                      	push    si			;coloca a abcisa xc+x na pilha
+    86 00000076 89DE                    	mov		si,bx
+    87 00000078 29CE                    	sub		si,cx
+    88 0000007A 56                      	push    si			;coloca a ordenada yc-y na pilha
+    89 0000007B E8(0000)                	call plot_xy		;toma conta do s�timo octante
+    90 0000007E 89C6                    	mov		si,ax
+    91 00000080 01CE                    	add		si,cx
+    92 00000082 56                      	push    si			;coloca a abcisa xc+y na pilha
+    93 00000083 89DE                    	mov		si,bx
+    94 00000085 01D6                    	add		si,dx
+    95 00000087 56                      	push    si			;coloca a ordenada yc+x na pilha
+    96 00000088 E8(0000)                	call plot_xy		;toma conta do segundo octante
+    97 0000008B 89C6                    	mov		si,ax
+    98 0000008D 01CE                    	add		si,cx
+    99 0000008F 56                      	push    si			;coloca a abcisa xc+y na pilha
+   100 00000090 89DE                    	mov		si,bx
+   101 00000092 29D6                    	sub		si,dx
+   102 00000094 56                      	push    si			;coloca a ordenada yc-x na pilha
+   103 00000095 E8(0000)                	call plot_xy		;toma conta do oitavo octante
+   104 00000098 89C6                    	mov		si,ax
+   105 0000009A 29D6                    	sub		si,dx
+   106 0000009C 56                      	push    si			;coloca a abcisa xc-x na pilha
+   107 0000009D 89DE                    	mov		si,bx
+   108 0000009F 01CE                    	add		si,cx
+   109 000000A1 56                      	push    si			;coloca a ordenada yc+y na pilha
+   110 000000A2 E8(0000)                	call plot_xy		;toma conta do terceiro octante
+   111 000000A5 89C6                    	mov		si,ax
+   112 000000A7 29D6                    	sub		si,dx
+   113 000000A9 56                      	push    si			;coloca a abcisa xc-x na pilha
+   114 000000AA 89DE                    	mov		si,bx
+   115 000000AC 29CE                    	sub		si,cx
+   116 000000AE 56                      	push    si			;coloca a ordenada yc-y na pilha
+   117 000000AF E8(0000)                	call plot_xy		;toma conta do sexto octante
+   118 000000B2 89C6                    	mov		si,ax
+   119 000000B4 29CE                    	sub		si,cx
+   120 000000B6 56                      	push    si			;coloca a abcisa xc-y na pilha
+   121 000000B7 89DE                    	mov		si,bx
+   122 000000B9 29D6                    	sub		si,dx
+   123 000000BB 56                      	push    si			;coloca a ordenada yc-x na pilha
+   124 000000BC E8(0000)                	call plot_xy		;toma conta do quinto octante
+   125 000000BF 89C6                    	mov		si,ax
+   126 000000C1 29CE                    	sub		si,cx
+   127 000000C3 56                      	push    si			;coloca a abcisa xc-y na pilha
+   128 000000C4 89DE                    	mov		si,bx
+   129 000000C6 01D6                    	add		si,dx
+   130 000000C8 56                      	push    si			;coloca a ordenada yc-x na pilha
+   131 000000C9 E8(0000)                	call plot_xy		;toma conta do quarto octante
+   132                                  	
+   133 000000CC 39D1                    	cmp		cx,dx
+   134 000000CE 7203                    	jb		fim_circle  ;se cx (y) est� abaixo de dx (x), termina     
+   135 000000D0 E96DFF                  	jmp		stay		;se cx (y) est� acima de dx (x), continua no loop
+   136                                  	
+   137                                  	
+   138                                  fim_circle:
+   139 000000D3 5F                      	pop		di
+   140 000000D4 5E                      	pop		si
+   141 000000D5 5A                      	pop		dx
+   142 000000D6 59                      	pop		cx
+   143 000000D7 5B                      	pop		bx
+   144 000000D8 58                      	pop		ax
+   145 000000D9 9D                      	popf
+   146 000000DA 5D                      	pop		bp
+   147 000000DB C20600                  	ret		6

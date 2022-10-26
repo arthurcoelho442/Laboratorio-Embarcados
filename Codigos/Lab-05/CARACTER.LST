@@ -1,0 +1,34 @@
+     1                                  ;
+     2                                  ;Funcao caracter escrito na posicao do cursor
+     3                                  ;
+     4                                  ; AL= caracter a ser escrito
+     5                                  ; cor definida na variavel cor
+     6                                  global caracter
+     7                                  extern cor
+     8                                  caracter:
+     9                                  
+    10                                  ;Salvando o contexto, empilhando registradores
+    11 00000000 9C                      		PUSHF
+    12 00000001 50                      		PUSH 	AX
+    13 00000002 53                      		PUSH 	BX
+    14 00000003 51                      		PUSH	CX
+    15 00000004 52                      		PUSH	DX
+    16 00000005 56                      		PUSH	SI
+    17 00000006 57                      		PUSH	DI
+    18 00000007 55                      		PUSH	BP
+    19                                  ;Preparando para chamar a int 10h	        	
+    20 00000008 B409                        	MOV     AH,9        ;INT 10h/AH = 09h - write character and attribute at cursor position.
+    21 0000000A B700                        	MOV     BH,0        ;BH = page number. 
+    22 0000000C 8A1E[0000]                  	MOV     BL,[cor]    ;BL = attribute.
+    23 00000010 B90100                      	MOV     CX,1        ;CX = number of times to write character.
+    24 00000013 CD10                       		INT     10h
+    25                                  ;Recupera-se o contexto			
+    26 00000015 5D                      		POP		BP
+    27 00000016 5F                      		POP		DI
+    28 00000017 5E                      		POP		SI
+    29 00000018 5A                      		POP		DX
+    30 00000019 59                      		POP		CX
+    31 0000001A 5B                      		POP		BX
+    32 0000001B 58                      		POP		AX
+    33 0000001C 9D                      		POPF
+    34 0000001D C3                      		RET

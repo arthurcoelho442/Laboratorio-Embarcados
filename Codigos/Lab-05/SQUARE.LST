@@ -1,0 +1,118 @@
+     1                                  ;-----------------------------------------------------------------------------
+     2                                  ;
+     3                                  ; Função square
+     4                                  ; PUSH x1; PUSH y1; PUSH x2; PUSH y2; CALL square;  (x<639, y<479)
+     5                                  ;
+     6                                  global square
+     7                                  
+     8                                  extern plot_xy, line
+     9                                  		
+    10                                  square: ;desenhar retas
+    11 00000000 55                      	PUSH 	BP
+    12 00000001 89E5                    	MOV	 	BP,SP
+    13                                  	;Salvando o contexto, empilhando registradores		
+    14 00000003 9C                      	PUSHF
+    15 00000004 50                      	PUSH 	AX
+    16 00000005 53                      	PUSH 	BX
+    17 00000006 51                      	PUSH	CX
+    18 00000007 52                      	PUSH	DX
+    19 00000008 56                      	PUSH	SI
+    20 00000009 57                      	PUSH	DI
+    21                                  	;Resgata os valores das coordenadas	previamente definidas antes de chamar a funcao line
+    22 0000000A 8B5E0A                  	MOV		BX,[bp+10]  ;x1
+    23 0000000D 8B4E08                  	MOV		CX,[bp+8]   ;y1 
+    24 00000010 8B5606                  	MOV		DX,[bp+6]   ;x2 
+    25 00000013 8B7604                  	MOV		SI,[bp+4]   ;y2
+    26                                  
+    27 00000016 B8DF01                  	MOV		AX, 479
+    28 00000019 29C8                    	SUB		AX, CX
+    29 0000001B 89C1                    	MOV		CX, AX
+    30                                  
+    31 0000001D B8DF01                  	MOV		AX, 479
+    32 00000020 29F0                    	SUB		AX, SI
+    33 00000022 89C6                    	MOV		SI, AX
+    34                                  
+    35                                  	; Superior
+    36 00000024 53                      	PUSH	BX
+    37 00000025 51                      	PUSH	CX
+    38 00000026 52                      	PUSH	DX
+    39 00000027 51                      	PUSH	CX
+    40 00000028 E8(0000)                	CALL	line
+    41                                  	; Inferior
+    42 0000002B 52                      	PUSH	DX
+    43 0000002C 56                      	PUSH	SI
+    44 0000002D 53                      	PUSH	BX
+    45 0000002E 56                      	PUSH	SI
+    46 0000002F E8(0000)                	CALL	line
+    47                                  	; Direita
+    48 00000032 52                      	PUSH	DX
+    49 00000033 51                      	PUSH	CX
+    50 00000034 52                      	PUSH	DX
+    51 00000035 56                      	PUSH	SI
+    52 00000036 E8(0000)                	CALL	line
+    53                                  	; Esquerda
+    54 00000039 53                      	PUSH	BX
+    55 0000003A 51                      	PUSH	CX
+    56 0000003B 53                      	PUSH	BX
+    57 0000003C 56                      	PUSH	SI
+    58 0000003D E8(0000)                	CALL	line
+    59                                  
+    60 00000040 5F                      	POP		DI
+    61 00000041 5E                      	POP		SI
+    62 00000042 5A                      	POP		DX
+    63 00000043 59                      	POP		CX
+    64 00000044 5B                      	POP		BX
+    65 00000045 58                      	POP		AX
+    66 00000046 9D                      	POPF
+    67 00000047 5D                      	POP		BP
+    68 00000048 C20800                  	RET		8
+    69                                  %include "Data.asm"
+    70                              <1> segment data
+    71                              <1> 
+    72 00000000 0F                  <1> cor		db		branco_intenso
+    73                              <1> 
+    74                              <1> ;	I R G B COR
+    75                              <1> ;	0 0 0 0 preto
+    76                              <1> ;	0 0 0 1 azul
+    77                              <1> ;	0 0 1 0 verde
+    78                              <1> ;	0 0 1 1 cyan
+    79                              <1> ;	0 1 0 0 vermelho
+    80                              <1> ;	0 1 0 1 magenta
+    81                              <1> ;	0 1 1 0 marrom
+    82                              <1> ;	0 1 1 1 branco
+    83                              <1> ;	1 0 0 0 cinza
+    84                              <1> ;	1 0 0 1 azul claro
+    85                              <1> ;	1 0 1 0 verde claro
+    86                              <1> ;	1 0 1 1 cyan claro
+    87                              <1> ;	1 1 0 0 rosa
+    88                              <1> ;	1 1 0 1 magenta claro
+    89                              <1> ;	1 1 1 0 amarelo
+    90                              <1> ;	1 1 1 1 branco intenso
+    91                              <1> 
+    92                              <1> preto		    equ		0
+    93                              <1> azul		    equ		1
+    94                              <1> verde		    equ		2
+    95                              <1> cyan		    equ		3
+    96                              <1> vermelho	    equ		4
+    97                              <1> magenta		    equ		5
+    98                              <1> marrom		    equ		6
+    99                              <1> branco		    equ		7
+   100                              <1> cinza		    equ		8
+   101                              <1> azul_claro	    equ		9
+   102                              <1> verde_claro	    equ		10
+   103                              <1> cyan_claro	    equ		11
+   104                              <1> rosa		    equ		12
+   105                              <1> magenta_claro	equ		13
+   106                              <1> amarelo		    equ		14
+   107                              <1> branco_intenso	equ		15
+   108                              <1> 
+   109 00000001 00                  <1> modo_anterior	db		0
+   110 00000002 0000                <1> linha   	    dw  	0
+   111 00000004 0000                <1> coluna  	    dw  	0
+   112 00000006 0000                <1> deltax		    dw		0
+   113 00000008 0000                <1> deltay		    dw		0	
+   114 0000000A 46756EC3A7C3A36F20- <1> mens    	    db  	'Função Gráfica Sistemas Embarcados I $' 
+   115 00000013 4772C3A16669636120- <1>
+   116 0000001C 53697374656D617320- <1>
+   117 00000025 456D6261726361646F- <1>
+   118 0000002E 7320492024          <1>
