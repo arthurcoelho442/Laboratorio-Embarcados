@@ -3,7 +3,7 @@
 ;
 ; dh = linha (0-29) e  dl=coluna  (0-79)
 global cursor
-
+extern cor
 cursor:
 ;Salvando o contexto, empilhando registradores
 		PUSHF

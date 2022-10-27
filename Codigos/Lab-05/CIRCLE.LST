@@ -145,3 +145,76 @@
    145 000000D9 9D                      	popf
    146 000000DA 5D                      	pop		bp
    147 000000DB C20600                  	ret		6
+   148                                  
+   149                                  %include "Data.asm"
+   150                              <1> segment data
+   151                              <1> ;	I R G B COR
+   152                              <1> ;	0 0 0 0 preto
+   153                              <1> ;	0 0 0 1 azul
+   154                              <1> ;	0 0 1 0 verde
+   155                              <1> ;	0 0 1 1 cyan
+   156                              <1> ;	0 1 0 0 vermelho
+   157                              <1> ;	0 1 0 1 magenta
+   158                              <1> ;	0 1 1 0 marrom
+   159                              <1> ;	0 1 1 1 branco
+   160                              <1> ;	1 0 0 0 cinza
+   161                              <1> ;	1 0 0 1 azul claro
+   162                              <1> ;	1 0 1 0 verde claro
+   163                              <1> ;	1 0 1 1 cyan claro
+   164                              <1> ;	1 1 0 0 rosa
+   165                              <1> ;	1 1 0 1 magenta claro
+   166                              <1> ;	1 1 1 0 amarelo
+   167                              <1> ;	1 1 1 1 branco intenso
+   168                              <1> preto		    equ		0
+   169                              <1> azul		    equ		1
+   170                              <1> verde		    equ		2
+   171                              <1> cyan		    equ		3
+   172                              <1> vermelho	    equ		4
+   173                              <1> magenta		    equ		5
+   174                              <1> marrom		    equ		6
+   175                              <1> branco		    equ		7
+   176                              <1> cinza		    equ		8
+   177                              <1> azul_claro	    equ		9
+   178                              <1> verde_claro	    equ		10
+   179                              <1> cyan_claro	    equ		11
+   180                              <1> rosa		    equ		12
+   181                              <1> magenta_claro	equ		13
+   182                              <1> amarelo		    equ		14
+   183                              <1> branco_intenso	equ		15
+   184                              <1> 
+   185 00000000 0A                  <1> direcao			db		10
+   186                              <1> ;
+   187                              <1> ; D = Direita
+   188                              <1> ; E = Esquerda
+   189                              <1> ; C = Cima
+   190                              <1> ; B = Baixo
+   191                              <1> ;
+   192                              <1> ; 	D E C B DIRECAO
+   193                              <1> ;;;;;;;;;;;;;;;
+   194                              <1> ;	1 0 1 0  /|
+   195                              <1> ;			/
+   196                              <1> ;;;;;;;;;;;;;;;
+   197                              <1> ;	1 0 0 1 \
+   198                              <1> ;			 \|
+   199                              <1> ;;;;;;;;;;;;;;;
+   200                              <1> ;	0 1 1 0 |\
+   201                              <1> ;			  \
+   202                              <1> ;;;;;;;;;;;;;;;
+   203                              <1> ;	0 1 0 1   /
+   204                              <1> ;			|/
+   205                              <1> ;;;;;;;;;;;;;;;
+   206                              <1> 
+   207                              <1> angulo45		equ		10
+   208                              <1> angulo315		equ		9
+   209                              <1> angulo135		equ		6
+   210                              <1> angulo225		equ		5
+   211 00000001 0000                <1> linha   	    dw  	0
+   212 00000003 0000                <1> coluna  	    dw  	0
+   213 00000005 0000                <1> deltax		    dw		0
+   214 00000007 0000                <1> deltay		    dw		0	
+   215 00000009 4001                <1> x_pos			dw		320
+   216 0000000B F000                <1> y_pos			dw		240
+   217 0000000D 0A00                <1> raio_bola		dw		10
+   218                              <1> segment stack stack
+   219 00000000 0002                <1> 		DW 		512
+   220                              <1> stacktop:

@@ -54,7 +54,7 @@
     54                                  ;Compare modulus DeltAX & Deltay due to CX > AX -> x2 > x1
     55 00000038 51                      		PUSH	CX          ;Save x2 in stack
     56 00000039 29C1                    		SUB		CX,AX       ;CX = CX-AX -> x2 = x2-x1 -> DeltAX
-    57 0000003B 890E[0600]              		MOV		[deltax],CX ;Save deltAX
+    57 0000003B 890E[0500]              		MOV		[deltax],CX ;Save deltAX
     58 0000003F 59                      		POP		CX          ;CX = x2
     59                                  		
     60 00000040 52                      		PUSH	DX          ;Save y2 in stack		
@@ -64,23 +64,23 @@
     64                                  
     65                                  ;y = -mx+b 
     66                                  line32:		
-    67 00000047 8916[0800]              		MOV		[deltay],DX ;Save deltay
+    67 00000047 8916[0700]              		MOV		[deltay],DX ;Save deltay
     68 0000004B 5A                      		POP		DX          ;DX = y2
     69                                  
     70 0000004C 50                      		PUSH	AX          ;Save x2 in stack
-    71 0000004D A1[0600]                		MOV		AX,[deltax] ;Compare DeltAX with DeltaY
-    72 00000050 3B06[0800]              		CMP		AX,[deltay]
+    71 0000004D A1[0500]                		MOV		AX,[deltax] ;Compare DeltAX with DeltaY
+    72 00000050 3B06[0700]              		CMP		AX,[deltay]
     73 00000054 58                      		POP		AX          ;AX = x2
     74 00000055 724D                    		JB		line5       ;Jump if DeltAX < DeltaY
     75                                  
     76                                  	; CX > AX e deltAX>deltay
     77 00000057 51                      		PUSH	CX
     78 00000058 29C1                    		SUB		CX,AX
-    79 0000005A 890E[0600]              		MOV		[deltax],CX
+    79 0000005A 890E[0500]              		MOV		[deltax],CX
     80 0000005E 59                      		POP		CX
     81 0000005F 52                      		PUSH	DX
     82 00000060 29DA                    		SUB		DX,BX
-    83 00000062 8916[0800]              		MOV		[deltay],DX
+    83 00000062 8916[0700]              		MOV		[deltay],DX
     84 00000066 5A                      		POP		DX
     85                                  
     86 00000067 89C6                    		MOV		SI,AX
@@ -89,9 +89,9 @@
     89 0000006A 52                      		PUSH	DX
     90 0000006B 56                      		PUSH	SI
     91 0000006C 29C6                    		SUB		SI,AX	;(x-x1)
-    92 0000006E A1[0800]                		MOV		AX,[deltay]
+    92 0000006E A1[0700]                		MOV		AX,[deltay]
     93 00000071 F7EE                    		IMUL		SI
-    94 00000073 8B36[0600]              		MOV		SI,[deltax]		;arredondar
+    94 00000073 8B36[0500]              		MOV		SI,[deltax]		;arredondar
     95 00000077 D1EE                    		SHR		SI,1
     96                                  ; se numerador (DX)>0 soma se <0 SUBtrai
     97 00000079 81FA0000                		cmp		DX,0
@@ -102,7 +102,7 @@
    102 00000088 29F0                    ar1:	SUB		AX,SI
    103 0000008A 81DA0000                		sbb		DX,0
    104                                  arc1:
-   105 0000008E F73E[0600]              		idiv    word[deltax]
+   105 0000008E F73E[0500]              		idiv    word[deltax]
    106 00000092 01D8                    		ADD		AX,BX
    107 00000094 5E                      		POP		SI
    108 00000095 56                      		PUSH	SI
@@ -122,11 +122,11 @@
    122                                  line7:                          
    123 000000AB 51                      		PUSH	CX
    124 000000AC 29C1                    		SUB		CX,AX
-   125 000000AE 890E[0600]              		MOV		word[deltax],CX
+   125 000000AE 890E[0500]              		MOV		word[deltax],CX
    126 000000B2 59                      		POP		CX
    127 000000B3 52                      		PUSH	DX
    128 000000B4 29DA                    		SUB		DX,BX
-   129 000000B6 8916[0800]              		MOV		[deltay],DX
+   129 000000B6 8916[0700]              		MOV		[deltay],DX
    130 000000BA 5A                      		POP		DX
    131                                  
    132 000000BB 89DE                    		MOV		SI,BX
@@ -135,9 +135,9 @@
    135 000000BE 56                      		PUSH	SI
    136 000000BF 50                      		PUSH	AX
    137 000000C0 29DE                    		SUB		SI,BX	;(y-y1)
-   138 000000C2 A1[0600]                		MOV		AX,[deltax]
+   138 000000C2 A1[0500]                		MOV		AX,[deltax]
    139 000000C5 F7EE                    		IMUL		SI          ;SIgned multiply
-   140 000000C7 8B36[0800]              		MOV		SI,[deltay]		;arredondar
+   140 000000C7 8B36[0700]              		MOV		SI,[deltay]		;arredondar
    141 000000CB D1EE                    		SHR		SI,1            ;Shift operand1 Right
    142                                  		
    143                                  ; se numerador (DX)>0 soma se <0 SUBtrai
@@ -149,7 +149,7 @@
    149 000000DC 29F0                    ar2:	SUB		AX,SI
    150 000000DE 81DA0000                		sbb		DX,0
    151                                  arc2:
-   152 000000E2 F73E[0800]              		idiv    word[deltay]
+   152 000000E2 F73E[0700]              		idiv    word[deltay]
    153 000000E6 89C7                    		MOV		di,AX
    154 000000E8 58                      		POP		AX
    155 000000E9 01C7                    		ADD		di,AX
@@ -176,51 +176,73 @@
    176                                  
    177                                  %include "Data.asm"
    178                              <1> segment data
-   179                              <1> 
-   180 00000000 0F                  <1> cor		db		branco_intenso
-   181                              <1> 
-   182                              <1> ;	I R G B COR
-   183                              <1> ;	0 0 0 0 preto
-   184                              <1> ;	0 0 0 1 azul
-   185                              <1> ;	0 0 1 0 verde
-   186                              <1> ;	0 0 1 1 cyan
-   187                              <1> ;	0 1 0 0 vermelho
-   188                              <1> ;	0 1 0 1 magenta
-   189                              <1> ;	0 1 1 0 marrom
-   190                              <1> ;	0 1 1 1 branco
-   191                              <1> ;	1 0 0 0 cinza
-   192                              <1> ;	1 0 0 1 azul claro
-   193                              <1> ;	1 0 1 0 verde claro
-   194                              <1> ;	1 0 1 1 cyan claro
-   195                              <1> ;	1 1 0 0 rosa
-   196                              <1> ;	1 1 0 1 magenta claro
-   197                              <1> ;	1 1 1 0 amarelo
-   198                              <1> ;	1 1 1 1 branco intenso
-   199                              <1> 
-   200                              <1> preto		    equ		0
-   201                              <1> azul		    equ		1
-   202                              <1> verde		    equ		2
-   203                              <1> cyan		    equ		3
-   204                              <1> vermelho	    equ		4
-   205                              <1> magenta		    equ		5
-   206                              <1> marrom		    equ		6
-   207                              <1> branco		    equ		7
-   208                              <1> cinza		    equ		8
-   209                              <1> azul_claro	    equ		9
-   210                              <1> verde_claro	    equ		10
-   211                              <1> cyan_claro	    equ		11
-   212                              <1> rosa		    equ		12
-   213                              <1> magenta_claro	equ		13
-   214                              <1> amarelo		    equ		14
-   215                              <1> branco_intenso	equ		15
-   216                              <1> 
-   217 00000001 00                  <1> modo_anterior	db		0
-   218 00000002 0000                <1> linha   	    dw  	0
-   219 00000004 0000                <1> coluna  	    dw  	0
-   220 00000006 0000                <1> deltax		    dw		0
-   221 00000008 0000                <1> deltay		    dw		0	
-   222 0000000A 46756EC3A7C3A36F20- <1> mens    	    db  	'Função Gráfica Sistemas Embarcados I $' 
-   223 00000013 4772C3A16669636120- <1>
-   224 0000001C 53697374656D617320- <1>
-   225 00000025 456D6261726361646F- <1>
-   226 0000002E 7320492024          <1>
+   179                              <1> ;	I R G B COR
+   180                              <1> ;	0 0 0 0 preto
+   181                              <1> ;	0 0 0 1 azul
+   182                              <1> ;	0 0 1 0 verde
+   183                              <1> ;	0 0 1 1 cyan
+   184                              <1> ;	0 1 0 0 vermelho
+   185                              <1> ;	0 1 0 1 magenta
+   186                              <1> ;	0 1 1 0 marrom
+   187                              <1> ;	0 1 1 1 branco
+   188                              <1> ;	1 0 0 0 cinza
+   189                              <1> ;	1 0 0 1 azul claro
+   190                              <1> ;	1 0 1 0 verde claro
+   191                              <1> ;	1 0 1 1 cyan claro
+   192                              <1> ;	1 1 0 0 rosa
+   193                              <1> ;	1 1 0 1 magenta claro
+   194                              <1> ;	1 1 1 0 amarelo
+   195                              <1> ;	1 1 1 1 branco intenso
+   196                              <1> preto		    equ		0
+   197                              <1> azul		    equ		1
+   198                              <1> verde		    equ		2
+   199                              <1> cyan		    equ		3
+   200                              <1> vermelho	    equ		4
+   201                              <1> magenta		    equ		5
+   202                              <1> marrom		    equ		6
+   203                              <1> branco		    equ		7
+   204                              <1> cinza		    equ		8
+   205                              <1> azul_claro	    equ		9
+   206                              <1> verde_claro	    equ		10
+   207                              <1> cyan_claro	    equ		11
+   208                              <1> rosa		    equ		12
+   209                              <1> magenta_claro	equ		13
+   210                              <1> amarelo		    equ		14
+   211                              <1> branco_intenso	equ		15
+   212                              <1> 
+   213 00000000 0A                  <1> direcao			db		10
+   214                              <1> ;
+   215                              <1> ; D = Direita
+   216                              <1> ; E = Esquerda
+   217                              <1> ; C = Cima
+   218                              <1> ; B = Baixo
+   219                              <1> ;
+   220                              <1> ; 	D E C B DIRECAO
+   221                              <1> ;;;;;;;;;;;;;;;
+   222                              <1> ;	1 0 1 0  /|
+   223                              <1> ;			/
+   224                              <1> ;;;;;;;;;;;;;;;
+   225                              <1> ;	1 0 0 1 \
+   226                              <1> ;			 \|
+   227                              <1> ;;;;;;;;;;;;;;;
+   228                              <1> ;	0 1 1 0 |\
+   229                              <1> ;			  \
+   230                              <1> ;;;;;;;;;;;;;;;
+   231                              <1> ;	0 1 0 1   /
+   232                              <1> ;			|/
+   233                              <1> ;;;;;;;;;;;;;;;
+   234                              <1> 
+   235                              <1> angulo45		equ		10
+   236                              <1> angulo315		equ		9
+   237                              <1> angulo135		equ		6
+   238                              <1> angulo225		equ		5
+   239 00000001 0000                <1> linha   	    dw  	0
+   240 00000003 0000                <1> coluna  	    dw  	0
+   241 00000005 0000                <1> deltax		    dw		0
+   242 00000007 0000                <1> deltay		    dw		0	
+   243 00000009 4001                <1> x_pos			dw		320
+   244 0000000B F000                <1> y_pos			dw		240
+   245 0000000D 0A00                <1> raio_bola		dw		10
+   246                              <1> segment stack stack
+   247 00000000 0002                <1> 		DW 		512
+   248                              <1> stacktop:

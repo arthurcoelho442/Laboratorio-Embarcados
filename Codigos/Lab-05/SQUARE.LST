@@ -68,51 +68,73 @@
     68 00000048 C20800                  	RET		8
     69                                  %include "Data.asm"
     70                              <1> segment data
-    71                              <1> 
-    72 00000000 0F                  <1> cor		db		branco_intenso
-    73                              <1> 
-    74                              <1> ;	I R G B COR
-    75                              <1> ;	0 0 0 0 preto
-    76                              <1> ;	0 0 0 1 azul
-    77                              <1> ;	0 0 1 0 verde
-    78                              <1> ;	0 0 1 1 cyan
-    79                              <1> ;	0 1 0 0 vermelho
-    80                              <1> ;	0 1 0 1 magenta
-    81                              <1> ;	0 1 1 0 marrom
-    82                              <1> ;	0 1 1 1 branco
-    83                              <1> ;	1 0 0 0 cinza
-    84                              <1> ;	1 0 0 1 azul claro
-    85                              <1> ;	1 0 1 0 verde claro
-    86                              <1> ;	1 0 1 1 cyan claro
-    87                              <1> ;	1 1 0 0 rosa
-    88                              <1> ;	1 1 0 1 magenta claro
-    89                              <1> ;	1 1 1 0 amarelo
-    90                              <1> ;	1 1 1 1 branco intenso
-    91                              <1> 
-    92                              <1> preto		    equ		0
-    93                              <1> azul		    equ		1
-    94                              <1> verde		    equ		2
-    95                              <1> cyan		    equ		3
-    96                              <1> vermelho	    equ		4
-    97                              <1> magenta		    equ		5
-    98                              <1> marrom		    equ		6
-    99                              <1> branco		    equ		7
-   100                              <1> cinza		    equ		8
-   101                              <1> azul_claro	    equ		9
-   102                              <1> verde_claro	    equ		10
-   103                              <1> cyan_claro	    equ		11
-   104                              <1> rosa		    equ		12
-   105                              <1> magenta_claro	equ		13
-   106                              <1> amarelo		    equ		14
-   107                              <1> branco_intenso	equ		15
-   108                              <1> 
-   109 00000001 00                  <1> modo_anterior	db		0
-   110 00000002 0000                <1> linha   	    dw  	0
-   111 00000004 0000                <1> coluna  	    dw  	0
-   112 00000006 0000                <1> deltax		    dw		0
-   113 00000008 0000                <1> deltay		    dw		0	
-   114 0000000A 46756EC3A7C3A36F20- <1> mens    	    db  	'Função Gráfica Sistemas Embarcados I $' 
-   115 00000013 4772C3A16669636120- <1>
-   116 0000001C 53697374656D617320- <1>
-   117 00000025 456D6261726361646F- <1>
-   118 0000002E 7320492024          <1>
+    71                              <1> ;	I R G B COR
+    72                              <1> ;	0 0 0 0 preto
+    73                              <1> ;	0 0 0 1 azul
+    74                              <1> ;	0 0 1 0 verde
+    75                              <1> ;	0 0 1 1 cyan
+    76                              <1> ;	0 1 0 0 vermelho
+    77                              <1> ;	0 1 0 1 magenta
+    78                              <1> ;	0 1 1 0 marrom
+    79                              <1> ;	0 1 1 1 branco
+    80                              <1> ;	1 0 0 0 cinza
+    81                              <1> ;	1 0 0 1 azul claro
+    82                              <1> ;	1 0 1 0 verde claro
+    83                              <1> ;	1 0 1 1 cyan claro
+    84                              <1> ;	1 1 0 0 rosa
+    85                              <1> ;	1 1 0 1 magenta claro
+    86                              <1> ;	1 1 1 0 amarelo
+    87                              <1> ;	1 1 1 1 branco intenso
+    88                              <1> preto		    equ		0
+    89                              <1> azul		    equ		1
+    90                              <1> verde		    equ		2
+    91                              <1> cyan		    equ		3
+    92                              <1> vermelho	    equ		4
+    93                              <1> magenta		    equ		5
+    94                              <1> marrom		    equ		6
+    95                              <1> branco		    equ		7
+    96                              <1> cinza		    equ		8
+    97                              <1> azul_claro	    equ		9
+    98                              <1> verde_claro	    equ		10
+    99                              <1> cyan_claro	    equ		11
+   100                              <1> rosa		    equ		12
+   101                              <1> magenta_claro	equ		13
+   102                              <1> amarelo		    equ		14
+   103                              <1> branco_intenso	equ		15
+   104                              <1> 
+   105 00000000 0A                  <1> direcao			db		10
+   106                              <1> ;
+   107                              <1> ; D = Direita
+   108                              <1> ; E = Esquerda
+   109                              <1> ; C = Cima
+   110                              <1> ; B = Baixo
+   111                              <1> ;
+   112                              <1> ; 	D E C B DIRECAO
+   113                              <1> ;;;;;;;;;;;;;;;
+   114                              <1> ;	1 0 1 0  /|
+   115                              <1> ;			/
+   116                              <1> ;;;;;;;;;;;;;;;
+   117                              <1> ;	1 0 0 1 \
+   118                              <1> ;			 \|
+   119                              <1> ;;;;;;;;;;;;;;;
+   120                              <1> ;	0 1 1 0 |\
+   121                              <1> ;			  \
+   122                              <1> ;;;;;;;;;;;;;;;
+   123                              <1> ;	0 1 0 1   /
+   124                              <1> ;			|/
+   125                              <1> ;;;;;;;;;;;;;;;
+   126                              <1> 
+   127                              <1> angulo45		equ		10
+   128                              <1> angulo315		equ		9
+   129                              <1> angulo135		equ		6
+   130                              <1> angulo225		equ		5
+   131 00000001 0000                <1> linha   	    dw  	0
+   132 00000003 0000                <1> coluna  	    dw  	0
+   133 00000005 0000                <1> deltax		    dw		0
+   134 00000007 0000                <1> deltay		    dw		0	
+   135 00000009 4001                <1> x_pos			dw		320
+   136 0000000B F000                <1> y_pos			dw		240
+   137 0000000D 0A00                <1> raio_bola		dw		10
+   138                              <1> segment stack stack
+   139 00000000 0002                <1> 		DW 		512
+   140                              <1> stacktop:

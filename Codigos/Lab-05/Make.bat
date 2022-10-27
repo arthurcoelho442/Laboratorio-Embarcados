@@ -7,4 +7,5 @@ call nasm cursor
 call nasm caracter 
 call nasm plot_xy
 call nasm delay
-call freelink main line square fcircle circle cursor caracter plot_xy delay
+call nasm ball
+call freelink main line square fcircle circle cursor caracter plot_xy delay ball

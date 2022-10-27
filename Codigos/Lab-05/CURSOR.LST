@@ -3,7 +3,7 @@
      3                                  ;
      4                                  ; dh = linha (0-29) e  dl=coluna  (0-79)
      5                                  global cursor
-     6                                  
+     6                                  extern cor
      7                                  cursor:
      8                                  ;Salvando o contexto, empilhando registradores
      9 00000000 9C                      		PUSHF

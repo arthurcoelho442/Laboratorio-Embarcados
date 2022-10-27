@@ -1,7 +1,4 @@
 segment data
-
-cor		db		branco_intenso
-
 ;	I R G B COR
 ;	0 0 0 0 preto
 ;	0 0 0 1 azul
@@ -19,7 +16,6 @@ cor		db		branco_intenso
 ;	1 1 0 1 magenta claro
 ;	1 1 1 0 amarelo
 ;	1 1 1 1 branco intenso
-
 preto		    equ		0
 azul		    equ		1
 verde		    equ		2
@@ -37,9 +33,39 @@ magenta_claro	equ		13
 amarelo		    equ		14
 branco_intenso	equ		15
 
-modo_anterior	db		0
+direcao			db		10
+;
+; D = Direita
+; E = Esquerda
+; C = Cima
+; B = Baixo
+;
+; 	D E C B DIRECAO
+;;;;;;;;;;;;;;;
+;	1 0 1 0  /|
+;			/
+;;;;;;;;;;;;;;;
+;	1 0 0 1 \
+;			 \|
+;;;;;;;;;;;;;;;
+;	0 1 1 0 |\
+;			  \
+;;;;;;;;;;;;;;;
+;	0 1 0 1   /
+;			|/
+;;;;;;;;;;;;;;;
+
+angulo45		equ		10
+angulo315		equ		9
+angulo135		equ		6
+angulo225		equ		5
 linha   	    dw  	0
 coluna  	    dw  	0
 deltax		    dw		0
 deltay		    dw		0	
-mens    	    db  	'Função Gráfica Sistemas Embarcados I $' 
+x_pos			dw		320
+y_pos			dw		240
+raio_bola		dw		10
+segment stack stack
+		DW 		512
+stacktop:

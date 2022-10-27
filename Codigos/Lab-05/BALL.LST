@@ -1,0 +1,254 @@
+     1                                  ;-----------------------------------------------------------------------------
+     2                                  ;
+     3                                  ; Função ball
+     4                                  ;
+     5                                  global ball
+     6                                  
+     7                                  extern full_circle, delay, cor, x_canva, y_canva
+     8                                  
+     9                                  ball:
+    10                                  	;	Desenha circulo Vermelho
+    11 00000000 C606[0000]04            	MOV		byte [cor],vermelho	;cabeça
+    12 00000005 A1[0900]                	MOV		AX , [x_pos]		;x
+    13 00000008 50                      	PUSH	AX
+    14 00000009 A1[0B00]                	MOV		AX , [y_pos]		;y
+    15 0000000C 50                      	PUSH	AX
+    16 0000000D A1[0D00]                	MOV		AX , [raio_bola]	;r
+    17 00000010 50                      	PUSH	AX
+    18 00000011 E8(0000)                	CALL	full_circle
+    19                                  	;	Delay
+    20 00000014 E8(0000)                	CALL	delay
+    21                                  	
+    22                                  	;	Desenha circulo Preto
+    23 00000017 C606[0000]00            	MOV		byte [cor],preto	;cabeça
+    24 0000001C A1[0900]                	MOV		AX , [x_pos]		;x
+    25 0000001F 50                      	PUSH	AX
+    26 00000020 A1[0B00]                	MOV		AX , [y_pos]		;y
+    27 00000023 50                      	PUSH	AX
+    28 00000024 A1[0D00]                	MOV		AX , [raio_bola]	;r
+    29 00000027 50                      	PUSH	AX
+    30 00000028 E8(0000)                	CALL	full_circle
+    31                                  	
+    32 0000002B E80100                  	CALL 	adjust_direction
+    33 0000002E C3                      	RET
+    34                                  
+    35                                  adjust_direction:
+    36                                  	; Ajusta a direção
+    37 0000002F 803E[0000]0A            	CMP		byte[direcao], angulo45
+    38 00000034 7504                    	JNE		J135
+    39 00000036 E81B00                  	CALL	adjustment_45
+    40 00000039 C3                      	RET
+    41                                  	J135:
+    42 0000003A 803E[0000]06            		CMP		byte[direcao], angulo135
+    43 0000003F 7504                    		JNE		J225
+    44 00000041 E83500                  		CALL	adjustment_135
+    45 00000044 C3                      		RET
+    46                                  	J225:
+    47 00000045 803E[0000]05            		CMP		byte[direcao], angulo225
+    48 0000004A 7504                    		JNE		J315
+    49 0000004C E87300                  		CALL	adjustment_225
+    50 0000004F C3                      		RET	
+    51                                  	J315:
+    52 00000050 E89400                  		CALL	adjustment_315
+    53 00000053 C3                      		RET
+    54                                  
+    55                                  adjustment_45:
+    56                                  	; Pega posição atual
+    57 00000054 E8B500                  	CALL	current_position
+    58                                  	
+    59 00000057 031E[0D00]              	ADD		BX, [raio_bola]
+    60 0000005B 030E[0D00]              	ADD		CX, [raio_bola]
+    61                                  
+    62                                  	; Comparação X
+    63 0000005F 3B1E[0000]              	CMP 	BX,		[x_canva]	; Compara no eixo X a posição da bolinha com o canva do jogo
+    64 00000063 7442                    	JE		R135				; Ajusta posição para 135° caso bata na parede Direita
+    65                                  	; Comparação Y
+    66 00000065 3B0E[0000]              	CMP 	CX,		[y_canva]	; Compara no eixo Y a posição da bolinha com o canva do jogo
+    67 00000069 744E                    	JE		R315				; Ajusta posição para 315° caso bata no Teto
+    68                                  	
+    69                                  	; Anda em 45°
+    70 0000006B 43                      	INC 	BX
+    71 0000006C 41                      	INC 	CX
+    72                                  
+    73                                  	; Remove Raio
+    74 0000006D 2B1E[0D00]              	SUB		BX, [raio_bola]
+    75 00000071 2B0E[0D00]              	SUB		CX, [raio_bola]
+    76                                  
+    77 00000075 E89D00                  	CALL	save_position
+    78 00000078 C3                      	RET
+    79                                  
+    80                                  adjustment_135:
+    81                                  	; Pega posição atual
+    82 00000079 E89000                  	CALL	current_position
+    83                                  	
+    84 0000007C 2B1E[0D00]              	SUB		BX, [raio_bola]
+    85 00000080 030E[0D00]              	ADD		CX, [raio_bola]
+    86                                  
+    87                                  	; Comparação X
+    88 00000084 81FB0000                	CMP 	BX,		0			; Compara no eixo X a posição da bolinha com o canva do jogo
+    89 00000088 7414                    	JE		R45					; Ajusta posição para 135° caso bata na parede Esquerda
+    90                                  	; Comparação Y
+    91 0000008A 3B0E[0000]              	CMP 	CX,		[y_canva]	; Compara no eixo Y a posição da bolinha com o canva do jogo
+    92 0000008E 7420                    	JE		R225				; Ajusta posição para 315° caso bata no Teto
+    93                                  
+    94                                  	; Anda em 135°
+    95 00000090 4B                      	DEC 	BX
+    96 00000091 41                      	INC 	CX
+    97                                  
+    98                                  	; Remove Raio
+    99 00000092 031E[0D00]              	ADD		BX, [raio_bola]
+   100 00000096 2B0E[0D00]              	SUB		CX, [raio_bola]
+   101                                  
+   102 0000009A E87800                  	call save_position
+   103 0000009D C3                      	RET
+   104                                  
+   105                                  R45:
+   106 0000009E C606[0000]0A            	MOV		byte[direcao], angulo45
+   107 000000A3 E8AEFF                  	CALL	adjustment_45
+   108 000000A6 C3                      	RET
+   109                                  R135:
+   110 000000A7 C606[0000]06            	MOV		byte[direcao], angulo135
+   111 000000AC E8CAFF                  	CALL	adjustment_135
+   112 000000AF C3                      	RET
+   113                                  R225:
+   114 000000B0 C606[0000]05            	MOV		byte[direcao], angulo225
+   115 000000B5 E80A00                  	CALL	adjustment_225
+   116 000000B8 C3                      	RET
+   117                                  R315:
+   118 000000B9 C606[0000]09            	MOV		byte[direcao], angulo315
+   119 000000BE E82600                  	CALL	adjustment_315
+   120 000000C1 C3                      	RET
+   121                                  
+   122                                  adjustment_225:
+   123                                  	; Pega posição atual
+   124 000000C2 E84700                  	CALL	current_position
+   125                                  	
+   126 000000C5 2B1E[0D00]              	SUB		BX, [raio_bola]
+   127 000000C9 2B0E[0D00]              	SUB		CX, [raio_bola]
+   128                                  
+   129                                  	; Comparação X
+   130 000000CD 81FB0000                	CMP 	BX,		0			; Compara no eixo X a posição da bolinha com o canva do jogo
+   131 000000D1 74E6                    	JE		R315				; Ajusta posição para 135° caso bata na parede Esquerda
+   132                                  	; Comparação Y
+   133 000000D3 81F90000                	CMP 	CX,		0			; Compara no eixo Y a posição da bolinha com o canva do jogo
+   134 000000D7 74CE                    	JE		R135					; Ajusta posição para 315° caso bata no Base
+   135                                  
+   136                                  	; Anda em 225°
+   137 000000D9 4B                      	DEC 	BX
+   138 000000DA 49                      	DEC 	CX
+   139                                  
+   140                                  	; Remove Raio
+   141 000000DB 031E[0D00]              	ADD		BX, [raio_bola]
+   142 000000DF 030E[0D00]              	ADD		CX, [raio_bola]
+   143                                  
+   144 000000E3 E82F00                  	call save_position
+   145 000000E6 C3                      	RET
+   146                                  adjustment_315:
+   147                                  	; Pega posição atual
+   148 000000E7 E82200                  	CALL	current_position
+   149                                  	
+   150 000000EA 031E[0D00]              	ADD		BX, [raio_bola]
+   151 000000EE 2B0E[0D00]              	SUB		CX, [raio_bola]
+   152                                  
+   153                                  	; Comparação X
+   154 000000F2 3B1E[0000]              	CMP 	BX,		[x_canva]	; Compara no eixo X a posição da bolinha com o canva do jogo
+   155 000000F6 74B8                    	JE		R225				; Ajusta posição para 135° caso bata na parede Direita
+   156                                  	; Comparação Y
+   157 000000F8 81F90000                	CMP 	CX,		0			; Compara no eixo Y a posição da bolinha com o canva do jogo
+   158 000000FC 74A0                    	JE		R45					; Ajusta posição para 315° caso bata no Base
+   159                                  
+   160                                  	; Anda em 315°
+   161 000000FE 43                      	INC 	BX
+   162 000000FF 49                      	DEC 	CX
+   163                                  
+   164                                  	; Remove Raio
+   165 00000100 2B1E[0D00]              	SUB		BX, [raio_bola]
+   166 00000104 030E[0D00]              	ADD		CX, [raio_bola]
+   167                                  
+   168 00000108 E80A00                  	call save_position
+   169 0000010B C3                      	RET
+   170                                  
+   171                                  current_position:
+   172                                  	; Posição atual bolinha
+   173 0000010C 8B1E[0900]              	MOV		BX, [x_pos] ; x
+   174 00000110 8B0E[0B00]              	MOV		CX, [y_pos] ; y
+   175 00000114 C3                      	RET
+   176                                  
+   177                                  save_position:
+   178                                  	; Salva posição
+   179 00000115 891E[0900]              	MOV 	[x_pos], BX
+   180 00000119 890E[0B00]              	MOV 	[y_pos], CX
+   181 0000011D C3                      	RET
+   182                                  
+   183                                  %include "Data.asm"
+   184                              <1> segment data
+   185                              <1> ;	I R G B COR
+   186                              <1> ;	0 0 0 0 preto
+   187                              <1> ;	0 0 0 1 azul
+   188                              <1> ;	0 0 1 0 verde
+   189                              <1> ;	0 0 1 1 cyan
+   190                              <1> ;	0 1 0 0 vermelho
+   191                              <1> ;	0 1 0 1 magenta
+   192                              <1> ;	0 1 1 0 marrom
+   193                              <1> ;	0 1 1 1 branco
+   194                              <1> ;	1 0 0 0 cinza
+   195                              <1> ;	1 0 0 1 azul claro
+   196                              <1> ;	1 0 1 0 verde claro
+   197                              <1> ;	1 0 1 1 cyan claro
+   198                              <1> ;	1 1 0 0 rosa
+   199                              <1> ;	1 1 0 1 magenta claro
+   200                              <1> ;	1 1 1 0 amarelo
+   201                              <1> ;	1 1 1 1 branco intenso
+   202                              <1> preto		    equ		0
+   203                              <1> azul		    equ		1
+   204                              <1> verde		    equ		2
+   205                              <1> cyan		    equ		3
+   206                              <1> vermelho	    equ		4
+   207                              <1> magenta		    equ		5
+   208                              <1> marrom		    equ		6
+   209                              <1> branco		    equ		7
+   210                              <1> cinza		    equ		8
+   211                              <1> azul_claro	    equ		9
+   212                              <1> verde_claro	    equ		10
+   213                              <1> cyan_claro	    equ		11
+   214                              <1> rosa		    equ		12
+   215                              <1> magenta_claro	equ		13
+   216                              <1> amarelo		    equ		14
+   217                              <1> branco_intenso	equ		15
+   218                              <1> 
+   219 00000000 0A                  <1> direcao			db		10
+   220                              <1> ;
+   221                              <1> ; D = Direita
+   222                              <1> ; E = Esquerda
+   223                              <1> ; C = Cima
+   224                              <1> ; B = Baixo
+   225                              <1> ;
+   226                              <1> ; 	D E C B DIRECAO
+   227                              <1> ;;;;;;;;;;;;;;;
+   228                              <1> ;	1 0 1 0  /|
+   229                              <1> ;			/
+   230                              <1> ;;;;;;;;;;;;;;;
+   231                              <1> ;	1 0 0 1 \
+   232                              <1> ;			 \|
+   233                              <1> ;;;;;;;;;;;;;;;
+   234                              <1> ;	0 1 1 0 |\
+   235                              <1> ;			  \
+   236                              <1> ;;;;;;;;;;;;;;;
+   237                              <1> ;	0 1 0 1   /
+   238                              <1> ;			|/
+   239                              <1> ;;;;;;;;;;;;;;;
+   240                              <1> 
+   241                              <1> angulo45		equ		10
+   242                              <1> angulo315		equ		9
+   243                              <1> angulo135		equ		6
+   244                              <1> angulo225		equ		5
+   245 00000001 0000                <1> linha   	    dw  	0
+   246 00000003 0000                <1> coluna  	    dw  	0
+   247 00000005 0000                <1> deltax		    dw		0
+   248 00000007 0000                <1> deltay		    dw		0	
+   249 00000009 4001                <1> x_pos			dw		320
+   250 0000000B F000                <1> y_pos			dw		240
+   251 0000000D 0A00                <1> raio_bola		dw		10
+   252                              <1> segment stack stack
+   253 00000000 0002                <1> 		DW 		512
+   254                              <1> stacktop:

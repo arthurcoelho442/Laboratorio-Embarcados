@@ -17,4 +17,3 @@ del1:
 	pop cx ; Recupera cx da pilha
 	loop del2 ; No loop del2, cx é decrementado até que seja zero
 	ret
-%include "Data.asm"

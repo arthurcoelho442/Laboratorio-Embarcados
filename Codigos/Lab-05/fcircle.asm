@@ -130,3 +130,5 @@ fim_full_circle:
 	POPf
 	POP		bp
 	ret		6
+
+%include "Data.asm"

@@ -4,7 +4,6 @@
 ; cor definida na variavel cor
 global plot_xy
 extern cor
-
 plot_xy:
 		PUSH    BP
 		MOV		BP,SP
